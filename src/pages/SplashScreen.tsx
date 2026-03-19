@@ -56,8 +56,8 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
       <button
         onClick={handleClick}
         style={{
-          width: 100,
-          height: 100,
+          width: 20,
+          height: 20,
           borderRadius: "50%",
           background: `radial-gradient(circle at 50% 60%, ${colors.gold}, #8B6914)`,
           border: "none",
@@ -70,11 +70,11 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
         <div
           style={{
             position: "absolute",
-            left: "50%",
+            left: "1%",
             top: "-1px",
             transform: "translateX(-50%)",
-            width: 24,
-            height: 40,
+            width: 50,
+            height: 100,
             background: `linear-gradient(to top, ${colors.gold}, #E2690A, transparent)`,
             borderRadius: "50% 50% 50% 50% / 60% 60% 40% 40%",
             animation: "flicker1 1.2s ease-in-out infinite",
