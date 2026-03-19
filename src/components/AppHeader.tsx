@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { colors, fonts } from '@/styles/theme';
-import { useNavigate } from 'react-router-dom';
 
 const AppHeader: React.FC = () => {
   const { profile } = useAuth();
