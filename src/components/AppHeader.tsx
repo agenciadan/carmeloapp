@@ -3,11 +3,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { colors, fonts } from '@/styles/theme';
 
-const AppHeader: React.FC = () => {
+interface AppHeaderProps {
+  onNavigatePerfil?: () => void;
+}
+
+const AppHeader: React.FC<AppHeaderProps> = ({ onNavigatePerfil }) => {
   const { profile } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -59,7 +62,7 @@ const AppHeader: React.FC = () => {
             minWidth: 160, zIndex: 200,
           }}>
             <button
-              onClick={() => { setShowDropdown(false); navigate('/perfil'); }}
+              onClick={() => { setShowDropdown(false); onNavigatePerfil?.(); }}
               style={{
                 display: 'block', width: '100%', padding: '12px 16px', background: 'none',
                 border: 'none', color: colors.textPrimary, fontSize: 14, fontFamily: fonts.body,
