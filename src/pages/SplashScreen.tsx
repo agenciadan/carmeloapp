@@ -29,96 +29,153 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
       }}
     >
       <style>{`
-        @keyframes flameOuter {
-          0%, 100% { box-shadow: 0 0 20px ${colors.gold}44, 0 0 40px ${colors.gold}22, 0 -10px 30px #E2690A33; }
-          50% { box-shadow: 0 0 30px ${colors.gold}66, 0 0 60px ${colors.gold}33, 0 -15px 45px #E2690A44; }
-        }
-        @keyframes flameInner {
-          0%, 100% { transform: scale(1) translateY(0); opacity: 0.8; }
-          25% { transform: scale(1.05) translateY(-2px); opacity: 1; }
-          50% { transform: scale(0.95) translateY(-4px); opacity: 0.9; }
-          75% { transform: scale(1.08) translateY(-1px); opacity: 1; }
-        }
         @keyframes flicker1 {
-          0%, 100% { transform: translateY(0) scaleY(1); opacity: 0.7; }
-          50% { transform: translateY(-8px) scaleY(1.3); opacity: 1; }
+          0%   { transform: translateX(-50%) scaleX(1)   scaleY(1)   translateY(0px);  }
+          25%  { transform: translateX(-50%) scaleX(0.94) scaleY(1.04) translateY(-3px); }
+          50%  { transform: translateX(-50%) scaleX(1.06) scaleY(0.97) translateY(-6px); }
+          75%  { transform: translateX(-50%) scaleX(0.97) scaleY(1.06) translateY(-2px); }
+          100% { transform: translateX(-50%) scaleX(1)   scaleY(1)   translateY(0px);  }
         }
         @keyframes flicker2 {
-          0%, 100% { transform: translateY(0) scaleY(1) rotate(-5deg); opacity: 0.5; }
-          50% { transform: translateY(-12px) scaleY(1.5) rotate(5deg); opacity: 0.8; }
+          0%   { transform: translateX(-50%) scaleX(1)    scaleY(1)    translateY(0px)  rotate(0deg);  }
+          30%  { transform: translateX(-50%) scaleX(0.92) scaleY(1.08) translateY(-5px) rotate(-3deg); }
+          60%  { transform: translateX(-50%) scaleX(1.08) scaleY(0.95) translateY(-8px) rotate(3deg);  }
+          100% { transform: translateX(-50%) scaleX(1)    scaleY(1)    translateY(0px)  rotate(0deg);  }
+        }
+        @keyframes flicker3 {
+          0%   { transform: translateX(-50%) scaleX(1)    scaleY(1)    translateY(0px);  }
+          40%  { transform: translateX(-50%) scaleX(0.88) scaleY(1.12) translateY(-6px); }
+          70%  { transform: translateX(-50%) scaleX(1.1)  scaleY(0.92) translateY(-3px); }
+          100% { transform: translateX(-50%) scaleX(1)    scaleY(1)    translateY(0px);  }
+        }
+        @keyframes glowPulse {
+          0%   { opacity: 0.4; transform: scaleX(1);   }
+          50%  { opacity: 0.7; transform: scaleX(1.15); }
+          100% { opacity: 0.4; transform: scaleX(1);   }
         }
         @keyframes breathe {
-          0% { opacity: 0.4; }
-          100% { opacity: 1.0; }
+          0%   { opacity: 0.35; }
+          100% { opacity: 1.0;  }
         }
       `}</style>
 
-      <button
+      {/* Clickable flame container */}
+      <div
         onClick={handleClick}
         style={{
-          width: 20,
-          height: 20,
-          borderRadius: "50%",
-          background: `radial-gradient(circle at 50% 60%, ${colors.gold}, #8B6914)`,
-          border: "none",
-          cursor: "pointer",
           position: "relative",
-          animation: "flameOuter 2s ease-in-out infinite",
+          width: 120,
+          height: 200,
+          cursor: "pointer",
+          background: "transparent",
+          border: "none",
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "center",
         }}
       >
-        {/* Inner flame layers */}
+        {/* Chama base — a maior, tons dourado/laranja */}
         <div
           style={{
             position: "absolute",
-            left: "1%",
-            top: "-1px",
-            transform: "translateX(-50%)",
-            width: 50,
-            height: 100,
-            background: `linear-gradient(to top, ${colors.gold}, #E2690A, transparent)`,
-            borderRadius: "50% 50% 50% 50% / 60% 60% 40% 40%",
-            animation: "flicker1 1.2s ease-in-out infinite",
+            width: 90,
+            height: 190,
+            left: "50%",
+            top: 0,
+            background: "linear-gradient(to top, #C9A84C 0%, #E2690A 35%, #CC3D00 65%, transparent 100%)",
+            borderRadius: "50% 50% 30% 30% / 60% 60% 40% 40%",
+            animation: "flicker1 1.6s ease-in-out infinite",
+            opacity: 0.85,
+            filter: "blur(1px)",
           }}
         />
 
+        {/* Chama média — laranja/amarelo */}
         <div
           style={{
             position: "absolute",
-            left: "45%",
-            top: "-10px",
-            transform: "translateX(-50%)",
-            width: 16,
-            height: 30,
-            background: `linear-gradient(to top, #FFD700, #FF8C00, transparent)`,
-            borderRadius: "50% 50% 50% 50% / 60% 60% 40% 40%",
-            animation: "flicker2 1.5s ease-in-out infinite",
+            width: 58,
+            height: 130,
+            left: "48%",
+            top: 30,
+            background: "linear-gradient(to top, #FFD700 0%, #FF8C00 45%, #FF4500 75%, transparent 100%)",
+            borderRadius: "50% 50% 30% 30% / 60% 60% 40% 40%",
+            animation: "flicker2 1.2s ease-in-out infinite",
+            opacity: 0.9,
           }}
         />
 
+        {/* Chama interna — amarelo claro/branco */}
         <div
           style={{
             position: "absolute",
-            left: "55%",
-            top: "-8px",
-            transform: "translateX(-50%)",
-            width: 12,
-            height: 25,
-            background: `linear-gradient(to top, #FFF5CC, #FFD700, transparent)`,
-            borderRadius: "50% 50% 50% 50% / 60% 60% 40% 40%",
-            animation: "flicker1 0.9s ease-in-out infinite",
+            width: 30,
+            height: 80,
+            left: "51%",
+            top: 60,
+            background: "linear-gradient(to top, #FFFFFF 0%, #FFF8DC 25%, #FFD700 60%, transparent 100%)",
+            borderRadius: "50% 50% 30% 30% / 60% 60% 40% 40%",
+            animation: "flicker3 0.9s ease-in-out infinite",
+            opacity: 0.95,
           }}
         />
-      </button>
 
+        {/* Micro chama lateral esquerda */}
+        <div
+          style={{
+            position: "absolute",
+            width: 22,
+            height: 60,
+            left: "28%",
+            top: 80,
+            background: "linear-gradient(to top, #E2690A 0%, #FF8C00 50%, transparent 100%)",
+            borderRadius: "50% 50% 30% 30% / 60% 60% 40% 40%",
+            animation: "flicker2 1.4s ease-in-out infinite 0.3s",
+            opacity: 0.7,
+            transform: "rotate(-8deg)",
+          }}
+        />
+
+        {/* Micro chama lateral direita */}
+        <div
+          style={{
+            position: "absolute",
+            width: 18,
+            height: 50,
+            left: "68%",
+            top: 95,
+            background: "linear-gradient(to top, #C9A84C 0%, #FFD700 50%, transparent 100%)",
+            borderRadius: "50% 50% 30% 30% / 60% 60% 40% 40%",
+            animation: "flicker1 1.1s ease-in-out infinite 0.6s",
+            opacity: 0.65,
+            transform: "rotate(6deg)",
+          }}
+        />
+      </div>
+
+      {/* Reflexo/brilho no chão */}
+      <div
+        style={{
+          width: 80,
+          height: 14,
+          marginTop: 6,
+          background: "radial-gradient(ellipse, rgba(201,168,76,0.5) 0%, rgba(226,105,10,0.2) 50%, transparent 75%)",
+          borderRadius: "50%",
+          animation: "glowPulse 2s ease-in-out infinite",
+        }}
+      />
+
+      {/* Texto */}
       <p
         style={{
           fontFamily: fonts.body,
-          fontSize: 14,
+          fontSize: 13,
           color: colors.textMuted,
-          letterSpacing: 3,
+          letterSpacing: 4,
           textTransform: "uppercase",
-          marginTop: 32,
-          animation: "breathe 1.8s infinite alternate ease-in-out",
+          marginTop: 36,
+          animation: "breathe 1.8s ease-in-out infinite alternate",
+          userSelect: "none",
         }}
       >
         Toque Para Iniciar
