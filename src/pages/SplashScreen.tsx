@@ -25,9 +25,9 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
         justifyContent: 'center',
         zIndex: 9999,
         opacity: fading ? 0 : 1,
-        transition: 'opacity 0.4s ease',
-      }}
-    >
+        transition: 'opacity 0.4s ease'
+      }}>
+      
       <style>{`
         @keyframes flameOuter {
           0%, 100% { box-shadow: 0 0 20px ${colors.gold}44, 0 0 40px ${colors.gold}22, 0 -10px 30px #E2690A33; }
@@ -63,9 +63,9 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
           border: 'none',
           cursor: 'pointer',
           position: 'relative',
-          animation: 'flameOuter 2s ease-in-out infinite',
-        }}
-      >
+          animation: 'flameOuter 2s ease-in-out infinite'
+        }}>
+        
         {/* Inner flame layers */}
         <div
           style={{
@@ -77,9 +77,9 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
             height: 40,
             background: `linear-gradient(to top, ${colors.gold}, #E2690A, transparent)`,
             borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
-            animation: 'flicker1 1.2s ease-in-out infinite',
-          }}
-        />
+            animation: 'flicker1 1.2s ease-in-out infinite'
+          }} />
+        
         <div
           style={{
             position: 'absolute',
@@ -90,9 +90,9 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
             height: 30,
             background: `linear-gradient(to top, #FFD700, #FF8C00, transparent)`,
             borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
-            animation: 'flicker2 1.5s ease-in-out infinite',
-          }}
-        />
+            animation: 'flicker2 1.5s ease-in-out infinite'
+          }} />
+        
         <div
           style={{
             position: 'absolute',
@@ -103,21 +103,21 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
             height: 25,
             background: `linear-gradient(to top, #FFF5CC, #FFD700, transparent)`,
             borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
-            animation: 'flicker1 0.9s ease-in-out infinite',
-          }}
-        />
-        <span
-          style={{
-            position: 'relative',
-            zIndex: 1,
-            fontSize: 32,
-            color: '#0D1B2A',
-            animation: 'flameInner 2s ease-in-out infinite',
-            display: 'block',
-          }}
-        >
-          ✦
-        </span>
+            animation: 'flicker1 0.9s ease-in-out infinite'
+          }} />
+        
+        
+
+
+
+
+
+
+
+
+
+
+        
       </button>
 
       <p
@@ -128,13 +128,13 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
           letterSpacing: 3,
           textTransform: 'uppercase',
           marginTop: 32,
-          animation: 'breathe 1.8s infinite alternate ease-in-out',
-        }}
-      >
+          animation: 'breathe 1.8s infinite alternate ease-in-out'
+        }}>
+        
         Toque Para Iniciar
       </p>
-    </div>
-  );
+    </div>);
+
 };
 
 export default SplashScreen;
