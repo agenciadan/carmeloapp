@@ -1,19 +1,23 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { colors, fonts } from '@/styles/theme';
-import { useNavigate } from 'react-router-dom';
 
-const Perfil: React.FC = () => {
+interface PerfilProps {
+  onBack?: () => void;
+}
+
+const Perfil: React.FC<PerfilProps> = ({ onBack }) => {
   const { profile } = useAuth();
-  const navigate = useNavigate();
 
   if (!profile) return null;
 
   return (
     <div style={{ padding: '24px 20px' }}>
-      <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: colors.textMuted, cursor: 'pointer', fontSize: 14, marginBottom: 24, fontFamily: fonts.body }}>
-        ← Voltar
-      </button>
+      {onBack && (
+        <button onClick={onBack} style={{ background: 'none', border: 'none', color: colors.textMuted, cursor: 'pointer', fontSize: 14, marginBottom: 24, fontFamily: fonts.body }}>
+          ← Voltar
+        </button>
+      )}
 
       <div style={{ textAlign: 'center', marginBottom: 32 }}>
         <div style={{

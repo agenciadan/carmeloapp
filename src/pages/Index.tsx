@@ -98,7 +98,7 @@ const Index: React.FC = () => {
   return (
     <div style={appContainer}>
       <style>{globalScrollbarCSS}</style>
-      <AppHeader />
+      <AppHeader onNavigatePerfil={() => setShowPerfil(true)} />
       <div style={{ paddingTop: 64, paddingBottom: 72, minHeight: '100vh', boxSizing: 'border-box' }}>
         {renderTab()}
       </div>
