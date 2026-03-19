@@ -86,7 +86,7 @@ const Index: React.FC = () => {
   }
 
   const renderTab = () => {
-    if (showPerfil) return <Perfil />;
+    if (showPerfil) return <Perfil onBack={() => setShowPerfil(false)} />;
     switch (activeTab) {
       case 'inicio': return <VersiculoDoDia />;
       case 'aconselhar': return <Aconselhamento />;
