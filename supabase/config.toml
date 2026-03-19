@@ -1,1 +1,4 @@
 project_id = "xliecvqnqcygqlzdvmsr"
+
+[functions.anthropic-proxy]
+verify_jwt = false
