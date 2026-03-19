@@ -14,16 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      configuracoes: {
+        Row: {
+          anthropic_model: string
+          app_em_manutencao: boolean
+          atualizado_em: string
+          id: number
+          max_tokens: number
+          mensagem_manutencao: string | null
+        }
+        Insert: {
+          anthropic_model?: string
+          app_em_manutencao?: boolean
+          atualizado_em?: string
+          id?: number
+          max_tokens?: number
+          mensagem_manutencao?: string | null
+        }
+        Update: {
+          anthropic_model?: string
+          app_em_manutencao?: boolean
+          atualizado_em?: string
+          id?: number
+          max_tokens?: number
+          mensagem_manutencao?: string | null
+        }
+        Relationships: []
+      }
+      historico: {
+        Row: {
+          criado_em: string
+          dados_completos: Json | null
+          data_formatada: string | null
+          id: string
+          referencia: string | null
+          texto_preview: string | null
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          criado_em?: string
+          dados_completos?: Json | null
+          data_formatada?: string | null
+          id?: string
+          referencia?: string | null
+          texto_preview?: string | null
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          criado_em?: string
+          dados_completos?: Json | null
+          data_formatada?: string | null
+          id?: string
+          referencia?: string | null
+          texto_preview?: string | null
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "historico_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          ativo: boolean
+          criado_em: string
+          email: string | null
+          id: string
+          nome: string | null
+          role: string
+          ultimo_acesso: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          criado_em?: string
+          email?: string | null
+          id: string
+          nome?: string | null
+          role?: string
+          ultimo_acesso?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          criado_em?: string
+          email?: string | null
+          id?: string
+          nome?: string | null
+          role?: string
+          ultimo_acesso?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +247,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
