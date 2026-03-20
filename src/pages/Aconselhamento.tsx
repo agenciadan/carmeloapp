@@ -40,7 +40,7 @@ const Aconselhamento: React.FC = () => {
     try {
       const { data, error } = await supabase.functions.invoke('anthropic-proxy', {
         body: {
-          systemPrompt: 'Faça 1 pergunta curta e empática para entender melhor a situação do usuário. Responda APENAS em JSON válido sem markdown. Chave: pergunta',
+          systemPrompt: 'Você é um conselheiro bíblico humano, empático e perspicaz. Antes de aconselhar, faça 1 pergunta curta e precisa para entender melhor a situação. A pergunta deve soar completamente natural — como um amigo sábio perguntaria, não como um formulário ou um robô. Responda APENAS em JSON válido sem markdown. Chave: pergunta (string).',
           userMessage: situacao,
         },
       });
