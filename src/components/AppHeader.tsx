@@ -43,6 +43,13 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onNavigatePerfil, streak = 0 }) =
         </div>
       </div>
 
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {streak > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ fontSize: 14 }}>🔥</span>
+            <span style={{ fontSize: 13, color: colors.gold, fontWeight: 500 }}>{streak}</span>
+          </div>
+        )}
       <div ref={dropdownRef} style={{ position: 'relative' }}>
         <button
           onClick={() => setShowDropdown(!showDropdown)}

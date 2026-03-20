@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { colors, fonts } from '@/styles/theme';
@@ -13,8 +13,52 @@ interface VersiculoResult {
   aplicacao: string;
 }
 
-const VersiculoDoDia: React.FC = () => {
-  const { session } = useAuth();
+interface VersiculoDoDiaProps {
+  onNavigateTab?: (tab: string) => void;
+}
+
+const weeklyVerses = [
+  { texto: '"O SENHOR é o meu pastor; nada me faltará."', ref: 'Salmos 23:1' },
+  { texto: '"Tudo posso naquele que me fortalece."', ref: 'Filipenses 4:13' },
+  { texto: '"Porque eu, o SENHOR teu Deus, te sustento pela mão direita."', ref: 'Isaías 41:13' },
+  { texto: '"Entrega o teu caminho ao SENHOR; confia nele, e ele tudo fará."', ref: 'Salmos 37:5' },
+  { texto: '"A paz de Deus, que excede todo o entendimento, guardará os vossos corações."', ref: 'Filipenses 4:7' },
+  { texto: '"Sede fortes e corajosos. Não temais."', ref: 'Deuteronômio 31:6' },
+  { texto: '"Esta é a vitória que vence o mundo: a nossa fé."', ref: '1 João 5:4' },
+];
+
+const calcStreak = (dates: string[]): number => {
+  if (!dates.length) return 0;
+  const unique = [...new Set(dates.map(d => d.split('T')[0]))].sort().reverse();
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  if (unique[0] !== today && unique[0] !== yesterday) return 0;
+  let streak = 1;
+  for (let i = 1; i < unique.length; i++) {
+    const prev = new Date(unique[i - 1]);
+    const curr = new Date(unique[i]);
+    const diff = (prev.getTime() - curr.getTime()) / 86400000;
+    if (diff === 1) streak++;
+    else break;
+  }
+  return streak;
+};
+
+const getGreeting = (): string => {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return 'Bom dia,';
+  if (h >= 12 && h < 18) return 'Boa tarde,';
+  return 'Boa noite,';
+};
+
+const getFormattedDay = (): string => {
+  return new Date().toLocaleDateString('pt-BR', {
+    weekday: 'long', day: '2-digit', month: 'long',
+  }).replace(/^\w/, c => c.toUpperCase());
+};
+
+const VersiculoDoDia: React.FC<VersiculoDoDiaProps> = ({ onNavigateTab }) => {
+  const { session, profile } = useAuth();
   const userId = session?.user?.id;
 
   const [quiz, setQuiz] = useState<QuizVariation[]>([]);
@@ -22,8 +66,18 @@ const VersiculoDoDia: React.FC = () => {
   const [respostas, setRespostas] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VersiculoResult | null>(null);
-  const [saved, setSaved] = useState(false);
-  const [estado, setEstado] = useState<'quiz' | 'loading' | 'result'>('quiz');
+  const [estado, setEstado] = useState<'quiz' | 'loading' | 'dashboard'>('quiz');
+  const [streak, setStreak] = useState(0);
+  const [fadeIn, setFadeIn] = useState(false);
+
+  const fetchStreak = useCallback(async () => {
+    if (!userId) return;
+    const { data } = await supabase
+      .from('historico')
+      .select('criado_em')
+      .eq('user_id', userId);
+    if (data) setStreak(calcStreak(data.map(d => d.criado_em)));
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -34,13 +88,16 @@ const VersiculoDoDia: React.FC = () => {
         const parsed = JSON.parse(cached);
         if (parsed.date === new Date().toISOString().split('T')[0]) {
           setResult(parsed.data);
-          setEstado('result');
+          setEstado('dashboard');
+          setFadeIn(true);
+          fetchStreak();
           return;
         }
       } catch { /* ignore */ }
     }
     initQuiz();
-  }, [userId]);
+    fetchStreak();
+  }, [userId, fetchStreak]);
 
   const initQuiz = () => {
     setQuiz([
@@ -51,7 +108,6 @@ const VersiculoDoDia: React.FC = () => {
     setStep(0);
     setRespostas([]);
     setResult(null);
-    setSaved(false);
     setEstado('quiz');
   };
 
@@ -64,7 +120,6 @@ const VersiculoDoDia: React.FC = () => {
       return;
     }
 
-    // All 3 answered — call API
     setEstado('loading');
     setLoading(true);
 
@@ -80,113 +135,166 @@ const VersiculoDoDia: React.FC = () => {
 
       const parsed: VersiculoResult = JSON.parse(data.text);
       setResult(parsed);
-      setEstado('result');
 
-      // Cache
+      // Auto-save to localStorage
       if (userId) {
         localStorage.setItem(`carmelo:versiculoHoje:${userId}`, JSON.stringify({
           date: new Date().toISOString().split('T')[0],
           data: parsed,
         }));
       }
+
+      // Auto-save to historico
+      if (userId) {
+        const today = new Date();
+        const dataFormatada = today.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+        await supabase.from('historico').insert({
+          user_id: userId,
+          tipo: 'versiculo',
+          data_formatada: dataFormatada,
+          referencia: parsed.referencia,
+          texto_preview: parsed.texto.substring(0, 100),
+          dados_completos: parsed as any,
+        });
+      }
+
+      // Transition to dashboard
+      setLoading(false);
+      setTimeout(() => {
+        setEstado('dashboard');
+        setTimeout(() => setFadeIn(true), 50);
+      }, 300);
+      await fetchStreak();
     } catch (err) {
       console.error(err);
       setEstado('quiz');
       initQuiz();
-    } finally {
       setLoading(false);
     }
   };
 
-  const handleSave = async () => {
-    if (!userId || !result) return;
-    const today = new Date();
-    const dataFormatada = today.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-    await supabase.from('historico').insert({
-      user_id: userId,
-      tipo: 'versiculo',
-      data_formatada: dataFormatada,
-      referencia: result.referencia,
-      texto_preview: result.texto.substring(0, 100),
-      dados_completos: result as any,
-    });
-    setSaved(true);
-  };
+  const firstName = (profile?.nome || '').split(' ')[0] || 'amigo';
+  const todayVerse = weeklyVerses[new Date().getDay()];
 
-  const formatDate = () => {
-    return new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase();
-  };
-
+  // LOADING STATE
   if (estado === 'loading') {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 400, padding: 24 }}>
         <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
         <div style={{ width: 32, height: 32, border: `2px solid ${colors.border}`, borderTop: `2px solid ${colors.gold}`, borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
         <p style={{ fontFamily: fonts.display, fontStyle: 'italic', fontSize: 18, color: colors.textMuted, marginTop: 20, textAlign: 'center' }}>
-          Buscando sua palavra para hoje...
+          Preparando sua palavra para hoje...
         </p>
       </div>
     );
   }
 
-  if (estado === 'result' && result) {
+  // DASHBOARD STATE
+  if (estado === 'dashboard' && result) {
     return (
-      <div style={{ padding: '24px 20px' }}>
-        <p style={{ fontSize: 11, color: colors.textDim, textTransform: 'uppercase', letterSpacing: 2 }}>{formatDate()}</p>
-        <p style={{ fontFamily: fonts.display, fontSize: 15, color: colors.gold, marginTop: 28 }}>{result.referencia}</p>
-        <p style={{
-          fontFamily: fonts.display, fontStyle: 'italic', fontSize: 24, color: colors.textPrimary,
-          borderLeft: `2px solid ${colors.gold}`, paddingLeft: 20, marginTop: 16, lineHeight: 1.5,
-        }}>
-          {result.texto}
-        </p>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '28px 0' }}>
-          <div style={{ flex: 1, height: 0.5, background: colors.border }} />
-          <span style={{ color: colors.gold, fontSize: 12 }}>✦</span>
-          <div style={{ flex: 1, height: 0.5, background: colors.border }} />
+      <div style={{ opacity: fadeIn ? 1 : 0, transition: 'opacity 0.5s ease' }}>
+        {/* Seção 1 — Saudação */}
+        <div style={{ padding: '24px 24px 0' }}>
+          <p style={{ fontFamily: fonts.display, fontSize: 28, color: colors.textPrimary, fontWeight: 400, margin: 0 }}>
+            {getGreeting()} {firstName}
+          </p>
+          <p style={{ fontSize: 13, color: colors.textDim, marginTop: 4 }}>{getFormattedDay()}</p>
         </div>
 
-        <p style={{ fontSize: 15, color: '#9BAFC0', fontStyle: 'italic', lineHeight: 1.9 }}>{result.aplicacao}</p>
+        {/* Seção 2 — Card do Versículo */}
+        <div style={{ margin: '20px 24px 0' }}>
+          <div style={{ background: colors.bgSurface, border: `0.5px solid ${colors.border}`, borderRadius: 18, overflow: 'hidden' }}>
+            <div style={{ padding: '20px 20px 0' }}>
+              <p style={{ fontSize: 10, color: colors.textDim, textTransform: 'uppercase', letterSpacing: 2, margin: 0 }}>VERSÍCULO DO DIA</p>
+              <p style={{ fontFamily: fonts.display, fontSize: 20, color: colors.gold, fontWeight: 500, marginTop: 6, marginBottom: 0 }}>{result.referencia}</p>
+            </div>
+            <div style={{ padding: '14px 20px', borderLeft: `3px solid ${colors.gold}`, marginLeft: 20, marginRight: 20 }}>
+              <p style={{ fontFamily: fonts.display, fontStyle: 'italic', fontSize: 22, color: colors.textPrimary, lineHeight: 1.55, margin: 0 }}>
+                "{result.texto}"
+              </p>
+            </div>
+            {/* Divisor */}
+            <div style={{ position: 'relative', margin: '0 20px' }}>
+              <div style={{ height: 0.5, background: colors.border }} />
+              <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: colors.bgSurface, padding: '0 8px', fontSize: 12, color: colors.gold }}>✦</span>
+            </div>
+            <div style={{ padding: '16px 20px 20px' }}>
+              <p style={{ fontSize: 10, color: colors.textDim, textTransform: 'uppercase', letterSpacing: 2, margin: 0, marginBottom: 10 }}>PARA VOCÊ HOJE</p>
+              <p style={{ fontSize: 14, color: '#9BAFC0', fontStyle: 'italic', lineHeight: 1.8, margin: 0 }}>{result.aplicacao}</p>
+            </div>
+          </div>
+        </div>
 
-        <div style={{ display: 'flex', gap: 12, marginTop: 32 }}>
-          <button
-            onClick={handleSave}
-            disabled={saved}
+        {/* Seção 3 — Próximo passo do Plano (placeholder) */}
+        <div style={{ margin: '16px 24px 0' }}>
+          <div
+            onClick={() => onNavigateTab?.('plano')}
             style={{
-              flex: 1, padding: '14px', borderRadius: 10, border: 'none', cursor: 'pointer',
-              background: saved ? colors.bgSurface : colors.gold,
-              color: saved ? colors.textMuted : colors.bgPrimary,
-              fontSize: 14, fontWeight: 600, fontFamily: fonts.body,
+              background: 'transparent', border: `0.5px dashed ${colors.border}`, borderRadius: 14,
+              padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
             }}
           >
-            {saved ? '✓ Salvo' : '♡ Salvar'}
-          </button>
-          <button
-            onClick={() => {
-              if (userId) localStorage.removeItem(`carmelo:versiculoHoje:${userId}`);
-              initQuiz();
-            }}
+            <span style={{ fontSize: 18, color: colors.textDim }}>📖</span>
+            <span style={{ fontSize: 13, color: colors.textDim }}>Gerar meu plano de leitura</span>
+          </div>
+        </div>
+
+        {/* Seção 4 — Acesso rápido Aconselhamento */}
+        <div style={{ margin: '16px 24px 0' }}>
+          <div
+            onClick={() => onNavigateTab?.('aconselhar')}
             style={{
-              flex: 1, padding: '14px', borderRadius: 10, cursor: 'pointer',
-              background: 'transparent', border: `1px solid ${colors.gold}`,
-              color: colors.gold, fontSize: 14, fontWeight: 600, fontFamily: fonts.body,
+              background: `linear-gradient(135deg, ${colors.bgSurface} 0%, ${colors.bgHover} 100%)`,
+              border: `0.5px solid ${colors.border}`, borderRadius: 14, padding: '18px 20px',
+              display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer',
             }}
           >
-            Novo quiz
-          </button>
+            <div style={{
+              width: 44, height: 44, borderRadius: '50%', background: colors.bgPrimary,
+              border: `0.5px solid ${colors.gold}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            }}>
+              <span style={{ fontSize: 18, color: colors.gold }}>✦</span>
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 15, color: colors.textPrimary, fontWeight: 500, margin: 0 }}>Aconselhamento Bíblico</p>
+              <p style={{ fontSize: 12, color: colors.textMuted, marginTop: 3, margin: 0 }}>Compartilhe o que está no seu coração.</p>
+            </div>
+            <span style={{ fontSize: 16, color: colors.textDim }}>→</span>
+          </div>
+        </div>
+
+        {/* Seção 5 — Comunidade (em breve) */}
+        <div style={{ margin: '24px 24px 0' }}>
+          <p style={{ fontSize: 11, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 14 }}>COMUNIDADE</p>
+          <div style={{
+            background: colors.bgSurface, border: `0.5px dashed ${colors.border}`, borderRadius: 14,
+            padding: 24, textAlign: 'center',
+          }}>
+            <span style={{ fontSize: 32, opacity: 0.4, display: 'block', marginBottom: 12 }}>🕊</span>
+            <p style={{ fontFamily: fonts.display, fontSize: 17, color: colors.textDim, margin: 0 }}>A Comunidade está chegando</p>
+            <p style={{ fontSize: 13, color: '#2A3F52', marginTop: 8, lineHeight: 1.6 }}>
+              Em breve você poderá compartilhar versículos, reflexões e pedidos de oração.
+            </p>
+          </div>
+        </div>
+
+        {/* Seção 6 — Rodapé motivacional */}
+        <div style={{ padding: 24, marginTop: 8, textAlign: 'center' }}>
+          <p style={{ fontFamily: fonts.display, fontStyle: 'italic', fontSize: 14, color: '#2A3F52', lineHeight: 1.6, margin: 0 }}>
+            {todayVerse.texto}
+          </p>
+          <p style={{ fontSize: 11, color: colors.border, marginTop: 4 }}>{todayVerse.ref}</p>
         </div>
       </div>
     );
   }
 
-  // Quiz state
+  // QUIZ STATE
   if (!quiz.length) return null;
   const current = quiz[step];
 
   return (
     <div style={{ padding: '24px 20px' }}>
-      {/* Progress bar */}
       <div style={{ display: 'flex', gap: 6 }}>
         {[0, 1, 2].map((i) => (
           <div key={i} style={{ flex: 1, height: 2, borderRadius: 1, background: i <= step ? colors.gold : colors.border }} />
