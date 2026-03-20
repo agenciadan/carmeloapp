@@ -113,12 +113,12 @@ const Index: React.FC = () => {
 
   const renderTab = () => {
     switch (activeTab) {
-      case 'inicio': return <VersiculoDoDia />;
+      case 'inicio': return <VersiculoDoDia onNavigateTab={(tab) => setActiveTab(tab)} />;
       case 'aconselhar': return <Aconselhamento />;
       case 'plano': return <PlaceholderTab title="Plano de Leitura" emoji="📖" />;
       case 'comunidade': return <PlaceholderTab title="Comunidade" emoji="🕊" />;
       case 'perfil': return <Perfil onNavigateTab={(tab) => setActiveTab(tab)} />;
-      default: return <VersiculoDoDia />;
+      default: return <VersiculoDoDia onNavigateTab={(tab) => setActiveTab(tab)} />;
     }
   };
 
