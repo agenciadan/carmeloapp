@@ -10,6 +10,8 @@ interface Profile {
   ativo: boolean;
   criado_em: string;
   ultimo_acesso: string | null;
+  igreja: string | null;
+  avatar_url: string | null;
 }
 
 interface AuthContextType {
