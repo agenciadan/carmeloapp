@@ -125,7 +125,7 @@ const Index: React.FC = () => {
   return (
     <div style={appContainer}>
       <style>{globalScrollbarCSS}</style>
-      {showHeader && <AppHeader onNavigatePerfil={() => setActiveTab('perfil')} />}
+      {showHeader && <AppHeader onNavigatePerfil={() => setActiveTab('perfil')} streak={streak} />}
       <div style={{ paddingTop: showHeader ? 64 : 0, paddingBottom: 72, minHeight: '100vh', boxSizing: 'border-box' }}>
         {renderTab()}
       </div>
