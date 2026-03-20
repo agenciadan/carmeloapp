@@ -6,26 +6,29 @@ import AppHeader from '@/components/AppHeader';
 import TabBar from '@/components/TabBar';
 import VersiculoDoDia from '@/pages/VersiculoDoDia';
 import Aconselhamento from '@/pages/Aconselhamento';
-import Historico from '@/pages/Historico';
 import Perfil from '@/pages/Perfil';
 import SplashScreen from '@/pages/SplashScreen';
 import AuthPage from '@/pages/AuthPage';
+
+const PlaceholderTab: React.FC<{ title: string; emoji: string }> = ({ title, emoji }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: 40 }}>
+    <span style={{ fontSize: 48, marginBottom: 16 }}>{emoji}</span>
+    <h2 style={{ fontFamily: fonts.display, fontSize: 22, color: colors.textPrimary, textAlign: 'center' }}>{title}</h2>
+    <p style={{ fontSize: 14, color: colors.textMuted, textAlign: 'center', marginTop: 8 }}>Em breve</p>
+  </div>
+);
 
 const Index: React.FC = () => {
   const { session, profile, isAdmin, isLoading } = useAuth();
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState('inicio');
-  const [showPerfil, setShowPerfil] = useState(false);
   const [maintenance, setMaintenance] = useState<{ active: boolean; message: string }>({ active: false, message: '' });
 
-  // Check maintenance
   useEffect(() => {
     if (!session) return;
     const checkMaintenance = async () => {
       const { data } = await supabase.from('configuracoes').select('app_em_manutencao, mensagem_manutencao').eq('id', 1).single();
-      if (data) {
-        setMaintenance({ active: data.app_em_manutencao, message: data.mensagem_manutencao || '' });
-      }
+      if (data) setMaintenance({ active: data.app_em_manutencao, message: data.mensagem_manutencao || '' });
     };
     checkMaintenance();
   }, [session]);
@@ -55,7 +58,6 @@ const Index: React.FC = () => {
     );
   }
 
-  // Maintenance mode for non-admin
   if (maintenance.active && !isAdmin) {
     return (
       <div style={{ ...appContainer, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40 }}>
@@ -69,7 +71,6 @@ const Index: React.FC = () => {
     );
   }
 
-  // Check if user is inactive
   if (profile && !profile.ativo) {
     return (
       <div style={{ ...appContainer, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40 }}>
@@ -85,12 +86,15 @@ const Index: React.FC = () => {
     );
   }
 
+  const showHeader = activeTab !== 'perfil';
+
   const renderTab = () => {
-    if (showPerfil) return <Perfil onBack={() => setShowPerfil(false)} />;
     switch (activeTab) {
       case 'inicio': return <VersiculoDoDia />;
       case 'aconselhar': return <Aconselhamento />;
-      case 'historico': return <Historico />;
+      case 'plano': return <PlaceholderTab title="Plano de Leitura" emoji="📖" />;
+      case 'comunidade': return <PlaceholderTab title="Comunidade" emoji="🕊" />;
+      case 'perfil': return <Perfil onNavigateTab={(tab) => setActiveTab(tab)} />;
       default: return <VersiculoDoDia />;
     }
   };
@@ -98,11 +102,11 @@ const Index: React.FC = () => {
   return (
     <div style={appContainer}>
       <style>{globalScrollbarCSS}</style>
-      <AppHeader onNavigatePerfil={() => setShowPerfil(true)} />
-      <div style={{ paddingTop: 64, paddingBottom: 72, minHeight: '100vh', boxSizing: 'border-box' }}>
+      {showHeader && <AppHeader onNavigatePerfil={() => setActiveTab('perfil')} />}
+      <div style={{ paddingTop: showHeader ? 64 : 0, paddingBottom: 72, minHeight: '100vh', boxSizing: 'border-box' }}>
         {renderTab()}
       </div>
-      <TabBar activeTab={activeTab} onTabChange={(tab) => { setShowPerfil(false); setActiveTab(tab); }} />
+      <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
 };

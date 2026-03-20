@@ -41,6 +41,41 @@ export type Database = {
         }
         Relationships: []
       }
+      conquistas_usuario: {
+        Row: {
+          conquistado_em: string
+          emoji: string
+          id: string
+          tipo: string
+          titulo: string
+          user_id: string
+        }
+        Insert: {
+          conquistado_em?: string
+          emoji: string
+          id?: string
+          tipo: string
+          titulo: string
+          user_id: string
+        }
+        Update: {
+          conquistado_em?: string
+          emoji?: string
+          id?: string
+          tipo?: string
+          titulo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conquistas_usuario_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       historico: {
         Row: {
           criado_em: string
@@ -85,27 +120,33 @@ export type Database = {
       profiles: {
         Row: {
           ativo: boolean
+          avatar_url: string | null
           criado_em: string
           email: string | null
           id: string
+          igreja: string | null
           nome: string | null
           role: string
           ultimo_acesso: string | null
         }
         Insert: {
           ativo?: boolean
+          avatar_url?: string | null
           criado_em?: string
           email?: string | null
           id: string
+          igreja?: string | null
           nome?: string | null
           role?: string
           ultimo_acesso?: string | null
         }
         Update: {
           ativo?: boolean
+          avatar_url?: string | null
           criado_em?: string
           email?: string | null
           id?: string
+          igreja?: string | null
           nome?: string | null
           role?: string
           ultimo_acesso?: string | null
