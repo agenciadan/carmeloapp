@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { colors, fonts, appContainer, globalScrollbarCSS } from '@/styles/theme';
@@ -23,6 +23,29 @@ const Index: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState('inicio');
   const [maintenance, setMaintenance] = useState<{ active: boolean; message: string }>({ active: false, message: '' });
+  const [streak, setStreak] = useState(0);
+
+  const fetchStreak = useCallback(async () => {
+    if (!session?.user?.id) return;
+    const { data } = await supabase.from('historico').select('criado_em').eq('user_id', session.user.id);
+    if (data) {
+      const dates = data.map(d => d.criado_em);
+      const unique = [...new Set(dates.map(d => d.split('T')[0]))].sort().reverse();
+      const today = new Date().toISOString().split('T')[0];
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      if (unique[0] !== today && unique[0] !== yesterday) { setStreak(0); return; }
+      let s = 1;
+      for (let i = 1; i < unique.length; i++) {
+        const prev = new Date(unique[i - 1]);
+        const curr = new Date(unique[i]);
+        if ((prev.getTime() - curr.getTime()) / 86400000 === 1) s++;
+        else break;
+      }
+      setStreak(s);
+    }
+  }, [session?.user?.id]);
+
+  useEffect(() => { fetchStreak(); }, [fetchStreak]);
 
   useEffect(() => {
     if (!session) return;
@@ -90,19 +113,19 @@ const Index: React.FC = () => {
 
   const renderTab = () => {
     switch (activeTab) {
-      case 'inicio': return <VersiculoDoDia />;
+      case 'inicio': return <VersiculoDoDia onNavigateTab={(tab) => setActiveTab(tab)} />;
       case 'aconselhar': return <Aconselhamento />;
       case 'plano': return <PlaceholderTab title="Plano de Leitura" emoji="📖" />;
       case 'comunidade': return <PlaceholderTab title="Comunidade" emoji="🕊" />;
       case 'perfil': return <Perfil onNavigateTab={(tab) => setActiveTab(tab)} />;
-      default: return <VersiculoDoDia />;
+      default: return <VersiculoDoDia onNavigateTab={(tab) => setActiveTab(tab)} />;
     }
   };
 
   return (
     <div style={appContainer}>
       <style>{globalScrollbarCSS}</style>
-      {showHeader && <AppHeader onNavigatePerfil={() => setActiveTab('perfil')} />}
+      {showHeader && <AppHeader onNavigatePerfil={() => setActiveTab('perfil')} streak={streak} />}
       <div style={{ paddingTop: showHeader ? 64 : 0, paddingBottom: 72, minHeight: '100vh', boxSizing: 'border-box' }}>
         {renderTab()}
       </div>

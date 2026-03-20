@@ -5,9 +5,10 @@ import { colors, fonts } from '@/styles/theme';
 
 interface AppHeaderProps {
   onNavigatePerfil?: () => void;
+  streak?: number;
 }
 
-const AppHeader: React.FC<AppHeaderProps> = ({ onNavigatePerfil }) => {
+const AppHeader: React.FC<AppHeaderProps> = ({ onNavigatePerfil, streak = 0 }) => {
   const { profile } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -42,6 +43,13 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onNavigatePerfil }) => {
         </div>
       </div>
 
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {streak > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ fontSize: 14 }}>🔥</span>
+            <span style={{ fontSize: 13, color: colors.gold, fontWeight: 500 }}>{streak}</span>
+          </div>
+        )}
       <div ref={dropdownRef} style={{ position: 'relative' }}>
         <button
           onClick={() => setShowDropdown(!showDropdown)}
@@ -87,6 +95,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onNavigatePerfil }) => {
             </button>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
