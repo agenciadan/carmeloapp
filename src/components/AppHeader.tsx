@@ -96,6 +96,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onNavigatePerfil, streak = 0 }) =
           </div>
         )}
       </div>
+      </div>
     </div>
   );
 };
