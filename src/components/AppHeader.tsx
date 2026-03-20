@@ -5,9 +5,10 @@ import { colors, fonts } from '@/styles/theme';
 
 interface AppHeaderProps {
   onNavigatePerfil?: () => void;
+  streak?: number;
 }
 
-const AppHeader: React.FC<AppHeaderProps> = ({ onNavigatePerfil }) => {
+const AppHeader: React.FC<AppHeaderProps> = ({ onNavigatePerfil, streak = 0 }) => {
   const { profile } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
