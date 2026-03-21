@@ -120,11 +120,40 @@ const VersiculoDoDia: React.FC<VersiculoDoDiaProps> = ({ onNavigateTab }) => {
   const [fadeIn, setFadeIn] = useState(false);
   const [resultFadeIn, setResultFadeIn] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  const [nextDay, setNextDay] = useState<{ dia_numero: number; referencia: string; titulo_passagem: string; plano_titulo: string } | null>(null);
 
   const fetchStreak = useCallback(async () => {
     if (!userId) return;
     const { data } = await supabase.from("historico").select("criado_em").eq("user_id", userId);
     if (data) setStreak(calcStreak(data.map((d) => d.criado_em)));
+  }, [userId]);
+
+  const fetchNextDay = useCallback(async () => {
+    if (!userId) return;
+    // Get active plan
+    const { data: planos } = await supabase
+      .from("planos_leitura")
+      .select("id, titulo")
+      .eq("user_id", userId)
+      .eq("status", "ativo")
+      .limit(1);
+
+    if (!planos || planos.length === 0) { setNextDay(null); return; }
+
+    const plano = planos[0];
+    const { data: diasData } = await supabase
+      .from("dias_leitura")
+      .select("dia_numero, referencia, titulo_passagem")
+      .eq("plano_id", plano.id)
+      .eq("concluido", false)
+      .order("dia_numero", { ascending: true })
+      .limit(1);
+
+    if (diasData && diasData.length > 0) {
+      setNextDay({ ...diasData[0], plano_titulo: plano.titulo });
+    } else {
+      setNextDay(null);
+    }
   }, [userId]);
 
   const initQuiz = useCallback(() => {
@@ -148,6 +177,7 @@ const VersiculoDoDia: React.FC<VersiculoDoDiaProps> = ({ onNavigateTab }) => {
           setEstado("dashboard");
           setFadeIn(true);
           fetchStreak();
+          fetchNextDay();
           return;
         }
       } catch {
@@ -156,7 +186,8 @@ const VersiculoDoDia: React.FC<VersiculoDoDiaProps> = ({ onNavigateTab }) => {
     }
     initQuiz();
     fetchStreak();
-  }, [userId, fetchStreak, initQuiz]);
+    fetchNextDay();
+  }, [userId, fetchStreak, fetchNextDay, initQuiz]);
 
   const handleAnswer = async (value: string) => {
     const newRespostas = [...respostas, value];
