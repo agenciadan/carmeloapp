@@ -212,47 +212,6 @@ export type Database = {
           },
         ]
       }
-      posts_comunidade: {
-        Row: {
-          conteudo: string
-          criado_em: string
-          id: string
-          nome_usuario: string
-          referencia_biblica: string | null
-          tipo: string
-          user_id: string
-          visivel: boolean
-        }
-        Insert: {
-          conteudo: string
-          criado_em?: string
-          id?: string
-          nome_usuario: string
-          referencia_biblica?: string | null
-          tipo: string
-          user_id: string
-          visivel?: boolean
-        }
-        Update: {
-          conteudo?: string
-          criado_em?: string
-          id?: string
-          nome_usuario?: string
-          referencia_biblica?: string | null
-          tipo?: string
-          user_id?: string
-          visivel?: boolean
-        }
-        Relationships: [
-          {
-            foreignKeyName: "posts_comunidade_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           ativo: boolean
@@ -288,45 +247,6 @@ export type Database = {
           ultimo_acesso?: string | null
         }
         Relationships: []
-      }
-      reacoes_posts: {
-        Row: {
-          criado_em: string
-          id: string
-          post_id: string
-          tipo: string
-          user_id: string
-        }
-        Insert: {
-          criado_em?: string
-          id?: string
-          post_id: string
-          tipo: string
-          user_id: string
-        }
-        Update: {
-          criado_em?: string
-          id?: string
-          post_id?: string
-          tipo?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reacoes_posts_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts_comunidade"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reacoes_posts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Views: {

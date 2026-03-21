@@ -107,96 +107,6 @@ const extractVersiculoResult = (data: any): VersiculoResult => {
   throw new Error(`Resposta inesperada da IA: ${JSON.stringify(data)}`);
 };
 
-const CommunityPreview: React.FC<{ onNavigateTab?: (tab: string) => void; userId?: string }> = ({ onNavigateTab, userId }) => {
-  const [posts, setPosts] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (!userId) return;
-    const load = async () => {
-      const { data } = await supabase
-        .from("posts_comunidade")
-        .select("*")
-        .eq("visivel", true)
-        .order("criado_em", { ascending: false })
-        .limit(3);
-      if (data) {
-        const postIds = data.map((p) => p.id);
-        const { data: reacoes } = postIds.length > 0
-          ? await supabase.from("reacoes_posts").select("tipo, post_id").in("post_id", postIds)
-          : { data: [] };
-        setPosts(data.map((p) => ({
-          ...p,
-          reacoes: (reacoes || []).filter((r) => r.post_id === p.id),
-        })));
-      }
-    };
-    load();
-  }, [userId]);
-
-  const typeBadgeSmall = (tipo: string) => {
-    const map: Record<string, { label: string; color: string; border: string; bg: string }> = {
-      versiculo: { label: "Versículo", color: colors.gold, border: colors.goldDim, bg: "#1A1000" },
-      reflexao: { label: "Reflexão", color: colors.textMuted, border: colors.border, bg: colors.bgSurface },
-      oracao: { label: "Oração", color: "#9BAFC0", border: colors.border, bg: colors.bgSurface },
-      plano: { label: "Plano", color: colors.success, border: "#0F2A1A", bg: "#091A0E" },
-    };
-    const s = map[tipo] || map.reflexao;
-    return <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 20, border: `0.5px solid ${s.border}`, color: s.color, background: s.bg }}>{s.label}</span>;
-  };
-
-  return (
-    <div style={{ margin: "24px 24px 0" }}>
-      <p style={{ fontSize: 11, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 14, margin: "0 0 14px" }}>
-        COMUNIDADE
-      </p>
-      {posts.length === 0 ? (
-        <div style={{ background: colors.bgSurface, border: `0.5px dashed ${colors.border}`, borderRadius: 14, padding: 24, textAlign: "center" }}>
-          <span style={{ fontSize: 32, opacity: 0.4, display: "block", marginBottom: 12 }}>🕊</span>
-          <p style={{ fontFamily: fonts.display, fontSize: 17, color: colors.textDim, margin: 0 }}>Seja o primeiro a compartilhar</p>
-          <p style={{ fontSize: 13, color: "#2A3F52", marginTop: 8, lineHeight: 1.6, margin: "8px 0 0" }}>
-            Compartilhe um versículo, reflexão ou pedido de oração com a comunidade.
-          </p>
-        </div>
-      ) : (
-        <>
-          {posts.map((p) => {
-            const orandoC = p.reacoes.filter((r: any) => r.tipo === "orando").length;
-            const ameiC = p.reacoes.filter((r: any) => r.tipo === "amei").length;
-            return (
-              <div key={p.id} style={{ background: colors.bgSurface, border: `0.5px solid ${colors.border}`, borderRadius: 12, padding: "14px 16px", marginBottom: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: 13, color: colors.textPrimary, fontWeight: 500 }}>{p.nome_usuario}</span>
-                  {typeBadgeSmall(p.tipo)}
-                </div>
-                {p.referencia_biblica && <p style={{ fontSize: 12, color: colors.gold, marginTop: 4, margin: "4px 0 0" }}>{p.referencia_biblica}</p>}
-                <p style={{ fontSize: 12, color: colors.textMuted, marginTop: 4, margin: "4px 0 0", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as any }}>
-                  {p.conteudo}
-                </p>
-                {(orandoC > 0 || ameiC > 0) && (
-                  <p style={{ fontSize: 11, color: colors.textDim, marginTop: 6, margin: "6px 0 0" }}>
-                    {orandoC > 0 && `🙏${orandoC} `}{ameiC > 0 && `❤️${ameiC}`}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-          <button
-            onClick={() => onNavigateTab?.("comunidade")}
-            style={{
-              border: `0.5px solid ${colors.border}`, color: colors.textDim, background: "transparent",
-              borderRadius: 10, padding: 12, width: "100%", fontSize: 13, cursor: "pointer",
-              marginTop: 12, fontFamily: fonts.body,
-            }}
-          >
-            Ver toda a comunidade
-          </button>
-        </>
-      )}
-    </div>
-  );
-};
-
-
 const VersiculoDoDia: React.FC<VersiculoDoDiaProps> = ({ onNavigateTab }) => {
   const { session, profile } = useAuth();
   const userId = session?.user?.id;
@@ -744,8 +654,37 @@ const VersiculoDoDia: React.FC<VersiculoDoDiaProps> = ({ onNavigateTab }) => {
           </div>
         </div>
 
-        {/* Comunidade — últimos posts */}
-        <CommunityPreview onNavigateTab={onNavigateTab} userId={userId} />
+        {/* Comunidade — em breve */}
+        <div style={{ margin: "24px 24px 0" }}>
+          <p
+            style={{
+              fontSize: 11,
+              color: colors.textMuted,
+              textTransform: "uppercase",
+              letterSpacing: 1.5,
+              marginBottom: 14,
+            }}
+          >
+            COMUNIDADE
+          </p>
+          <div
+            style={{
+              background: colors.bgSurface,
+              border: `0.5px dashed ${colors.border}`,
+              borderRadius: 14,
+              padding: 24,
+              textAlign: "center",
+            }}
+          >
+            <span style={{ fontSize: 32, opacity: 0.4, display: "block", marginBottom: 12 }}>🕊</span>
+            <p style={{ fontFamily: fonts.display, fontSize: 17, color: colors.textDim, margin: 0 }}>
+              A Comunidade está chegando
+            </p>
+            <p style={{ fontSize: 13, color: "#2A3F52", marginTop: 8, lineHeight: 1.6, margin: "8px 0 0" }}>
+              Em breve você poderá compartilhar versículos, reflexões e pedidos de oração.
+            </p>
+          </div>
+        </div>
 
         {/* Rodapé motivacional */}
         <div style={{ padding: 24, marginTop: 8, textAlign: "center" }}>

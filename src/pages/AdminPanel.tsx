@@ -9,9 +9,6 @@ const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
 
   const [metrics, setMetrics] = useState({ total: 0, ativos7d: 0, versiculos: 0, aconselhamentos: 0 });
-  const [communityPosts, setCommunityPosts] = useState<any[]>([]);
-  const [communityFilter, setCommunityFilter] = useState<'all' | 'hidden'>('all');
-  const [communityMetrics, setCommunityMetrics] = useState({ total: 0, visiveis: 0, ocultos: 0, reacoes: 0 });
   const [users, setUsers] = useState<any[]>([]);
   const [userSearch, setUserSearch] = useState('');
   const [userPage, setUserPage] = useState(0);
@@ -56,18 +53,6 @@ const AdminPanel: React.FC = () => {
       mensagem_manutencao: cfg.mensagem_manutencao || '',
     });
 
-    // Community
-    const { data: allPosts } = await supabase.from('posts_comunidade').select('*').order('criado_em', { ascending: false });
-    const posts = allPosts || [];
-    setCommunityPosts(posts);
-    const { data: allReacoes } = await supabase.from('reacoes_posts').select('id');
-    setCommunityMetrics({
-      total: posts.length,
-      visiveis: posts.filter((p: any) => p.visivel).length,
-      ocultos: posts.filter((p: any) => !p.visivel).length,
-      reacoes: (allReacoes || []).length,
-    });
-
     setLoading(false);
   };
 
@@ -92,12 +77,7 @@ const AdminPanel: React.FC = () => {
     alert('Configurações salvas!');
   };
 
-  const togglePostVisibility = async (postId: string, currentVisivel: boolean) => {
-    await supabase.from('posts_comunidade').update({ visivel: !currentVisivel }).eq('id', postId);
-    loadData();
-  };
-
-
+  const saveManutencao = async () => {
     await supabase.from('configuracoes').update({
       app_em_manutencao: config.app_em_manutencao,
       mensagem_manutencao: config.mensagem_manutencao,
@@ -282,56 +262,6 @@ const AdminPanel: React.FC = () => {
             {a.nome || '—'} — <span style={{ color: colors.textDim }}>{a.email}</span>
           </div>
         ))}
-      </div>
-
-      {/* Comunidade */}
-      <h3 style={sectionTitle}>Comunidade</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12, marginBottom: 16 }}>
-        {[
-          { n: communityMetrics.total, l: 'Total Posts' },
-          { n: communityMetrics.visiveis, l: 'Visíveis' },
-          { n: communityMetrics.ocultos, l: 'Ocultos' },
-          { n: communityMetrics.reacoes, l: 'Reações' },
-        ].map((m) => (
-          <div key={m.l} style={{ ...cardStyle, padding: 16 }}>
-            <div style={{ fontFamily: fonts.display, fontSize: 24, color: colors.gold }}>{m.n}</div>
-            <div style={{ fontSize: 10, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>{m.l}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-        <button onClick={() => setCommunityFilter('all')} style={{ padding: '6px 14px', borderRadius: 20, border: 'none', background: communityFilter === 'all' ? colors.gold : colors.bgSurface, color: communityFilter === 'all' ? colors.bgPrimary : colors.textMuted, cursor: 'pointer', fontSize: 12 }}>Todos</button>
-        <button onClick={() => setCommunityFilter('hidden')} style={{ padding: '6px 14px', borderRadius: 20, border: 'none', background: communityFilter === 'hidden' ? colors.gold : colors.bgSurface, color: communityFilter === 'hidden' ? colors.bgPrimary : colors.textMuted, cursor: 'pointer', fontSize: 12 }}>Apenas ocultos</button>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {communityPosts
-          .filter((p) => communityFilter === 'all' || !p.visivel)
-          .slice(0, 30)
-          .map((p: any) => (
-            <div key={p.id} style={{ background: colors.bgSurface, borderRadius: 10, padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, color: colors.textMuted, marginBottom: 4 }}>
-                  <span style={{ color: colors.textPrimary, fontWeight: 500 }}>{p.nome_usuario}</span>
-                  <span>·</span>
-                  <span>{p.tipo}</span>
-                  <span>·</span>
-                  <span>{new Date(p.criado_em).toLocaleDateString('pt-BR')}</span>
-                  <span style={{ padding: '1px 6px', borderRadius: 10, fontSize: 10, background: p.visivel ? `${colors.success}20` : `${colors.error}20`, color: p.visivel ? colors.success : colors.error }}>
-                    {p.visivel ? 'Visível' : 'Oculto'}
-                  </span>
-                </div>
-                <p style={{ fontSize: 12, color: colors.textDim, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {(p.conteudo || '').substring(0, 60)}
-                </p>
-              </div>
-              <button
-                onClick={() => togglePostVisibility(p.id, p.visivel)}
-                style={{ background: 'none', border: `1px solid ${colors.border}`, borderRadius: 6, padding: '4px 10px', color: colors.textMuted, cursor: 'pointer', fontSize: 11, marginLeft: 8, whiteSpace: 'nowrap' }}
-              >
-                {p.visivel ? 'Ocultar' : 'Restaurar'}
-              </button>
-            </div>
-          ))}
       </div>
 
       <div style={{ height: 60 }} />
