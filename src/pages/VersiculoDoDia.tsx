@@ -120,11 +120,40 @@ const VersiculoDoDia: React.FC<VersiculoDoDiaProps> = ({ onNavigateTab }) => {
   const [fadeIn, setFadeIn] = useState(false);
   const [resultFadeIn, setResultFadeIn] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  const [nextDay, setNextDay] = useState<{ dia_numero: number; referencia: string; titulo_passagem: string; plano_titulo: string } | null>(null);
 
   const fetchStreak = useCallback(async () => {
     if (!userId) return;
     const { data } = await supabase.from("historico").select("criado_em").eq("user_id", userId);
     if (data) setStreak(calcStreak(data.map((d) => d.criado_em)));
+  }, [userId]);
+
+  const fetchNextDay = useCallback(async () => {
+    if (!userId) return;
+    // Get active plan
+    const { data: planos } = await supabase
+      .from("planos_leitura")
+      .select("id, titulo")
+      .eq("user_id", userId)
+      .eq("status", "ativo")
+      .limit(1);
+
+    if (!planos || planos.length === 0) { setNextDay(null); return; }
+
+    const plano = planos[0];
+    const { data: diasData } = await supabase
+      .from("dias_leitura")
+      .select("dia_numero, referencia, titulo_passagem")
+      .eq("plano_id", plano.id)
+      .eq("concluido", false)
+      .order("dia_numero", { ascending: true })
+      .limit(1);
+
+    if (diasData && diasData.length > 0) {
+      setNextDay({ ...diasData[0], plano_titulo: plano.titulo });
+    } else {
+      setNextDay(null);
+    }
   }, [userId]);
 
   const initQuiz = useCallback(() => {
@@ -148,6 +177,7 @@ const VersiculoDoDia: React.FC<VersiculoDoDiaProps> = ({ onNavigateTab }) => {
           setEstado("dashboard");
           setFadeIn(true);
           fetchStreak();
+          fetchNextDay();
           return;
         }
       } catch {
@@ -156,7 +186,8 @@ const VersiculoDoDia: React.FC<VersiculoDoDiaProps> = ({ onNavigateTab }) => {
     }
     initQuiz();
     fetchStreak();
-  }, [userId, fetchStreak, initQuiz]);
+    fetchNextDay();
+  }, [userId, fetchStreak, fetchNextDay, initQuiz]);
 
   const handleAnswer = async (value: string) => {
     const newRespostas = [...respostas, value];
@@ -520,22 +551,65 @@ const VersiculoDoDia: React.FC<VersiculoDoDiaProps> = ({ onNavigateTab }) => {
 
         {/* Próximo passo do Plano */}
         <div style={{ margin: "16px 24px 0" }}>
-          <div
-            onClick={() => onNavigateTab?.("plano")}
-            style={{
-              background: "transparent",
-              border: `0.5px dashed ${colors.border}`,
-              borderRadius: 14,
-              padding: "16px 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              cursor: "pointer",
-            }}
-          >
-            <span style={{ fontSize: 18 }}>📖</span>
-            <span style={{ fontSize: 13, color: colors.textDim }}>Gerar meu plano de leitura</span>
-          </div>
+          {nextDay ? (
+            <div
+              onClick={() => onNavigateTab?.("plano")}
+              style={{
+                background: colors.bgSurface,
+                border: `0.5px solid ${colors.border}`,
+                borderRadius: 14,
+                padding: "18px 20px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                cursor: "pointer",
+              }}
+            >
+              <div>
+                <p style={{ fontSize: 10, color: colors.textDim, textTransform: "uppercase", letterSpacing: 1.5, margin: 0 }}>
+                  PLANO · DIA {nextDay.dia_numero}
+                </p>
+                <p style={{ fontFamily: fonts.display, fontSize: 17, color: colors.gold, marginTop: 6, margin: "6px 0 0" }}>
+                  {nextDay.referencia}
+                </p>
+                <p style={{ fontSize: 13, color: colors.textMuted, marginTop: 3, margin: "3px 0 0" }}>
+                  {nextDay.titulo_passagem}
+                </p>
+              </div>
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  background: colors.bgHover,
+                  border: `0.5px solid ${colors.gold}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ fontSize: 16, color: colors.gold }}>→</span>
+              </div>
+            </div>
+          ) : (
+            <div
+              onClick={() => onNavigateTab?.("plano")}
+              style={{
+                background: "transparent",
+                border: `0.5px dashed ${colors.border}`,
+                borderRadius: 14,
+                padding: "16px 20px",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                cursor: "pointer",
+              }}
+            >
+              <span style={{ fontSize: 18 }}>📖</span>
+              <span style={{ fontSize: 13, color: colors.textDim }}>Gerar meu plano de leitura</span>
+            </div>
+          )}
         </div>
 
         {/* Aconselhamento rápido */}

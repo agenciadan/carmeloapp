@@ -5,6 +5,7 @@ import { colors, fonts, appContainer, globalScrollbarCSS } from '@/styles/theme'
 import AppHeader from '@/components/AppHeader';
 import TabBar from '@/components/TabBar';
 import VersiculoDoDia from '@/pages/VersiculoDoDia';
+import PlanoLeitura from '@/pages/PlanoLeitura';
 import Aconselhamento from '@/pages/Aconselhamento';
 import Perfil from '@/pages/Perfil';
 import SplashScreen from '@/pages/SplashScreen';
@@ -115,7 +116,7 @@ const Index: React.FC = () => {
     switch (activeTab) {
       case 'inicio': return <VersiculoDoDia onNavigateTab={(tab) => setActiveTab(tab)} />;
       case 'aconselhar': return <Aconselhamento />;
-      case 'plano': return <PlaceholderTab title="Plano de Leitura" emoji="📖" />;
+      case 'plano': return <PlanoLeitura />;
       case 'comunidade': return <PlaceholderTab title="Comunidade" emoji="🕊" />;
       case 'perfil': return <Perfil onNavigateTab={(tab) => setActiveTab(tab)} />;
       default: return <VersiculoDoDia onNavigateTab={(tab) => setActiveTab(tab)} />;
