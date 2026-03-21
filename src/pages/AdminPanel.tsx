@@ -92,7 +92,12 @@ const AdminPanel: React.FC = () => {
     alert('Configurações salvas!');
   };
 
-  const saveManutencao = async () => {
+  const togglePostVisibility = async (postId: string, currentVisivel: boolean) => {
+    await supabase.from('posts_comunidade').update({ visivel: !currentVisivel }).eq('id', postId);
+    loadData();
+  };
+
+
     await supabase.from('configuracoes').update({
       app_em_manutencao: config.app_em_manutencao,
       mensagem_manutencao: config.mensagem_manutencao,
