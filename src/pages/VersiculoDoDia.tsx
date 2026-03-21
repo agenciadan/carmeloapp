@@ -197,6 +197,7 @@ const CommunityPreview: React.FC<{ onNavigateTab?: (tab: string) => void; userId
 };
 
 
+const VersiculoDoDia: React.FC<VersiculoDoDiaProps> = ({ onNavigateTab }) => {
   const { session, profile } = useAuth();
   const userId = session?.user?.id;
 
