@@ -25,9 +25,9 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
         justifyContent: "center",
         zIndex: 9999,
         opacity: fading ? 0 : 1,
-        transition: "opacity 0.4s ease"
-      }}>
-      
+        transition: "opacity 0.4s ease",
+      }}
+    >
       <style>{`
         @keyframes flicker1 {
           0%   { transform: translateX(-50%) scaleX(1)   scaleY(1)   translateY(0px);  }
@@ -71,86 +71,58 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
           border: "none",
           display: "flex",
           alignItems: "flex-end",
-          justifyContent: "center"
-        }}>
-        
+          justifyContent: "center",
+        }}
+      >
         {/* Chama base — a maior, tons dourado/laranja */}
         <div
           style={{
             position: "absolute",
             width: 90,
-            height: 190,
+            height: 100,
             left: "50%",
             top: 0,
             background: "linear-gradient(to top, #C9A84C 0%, #E2690A 35%, #CC3D00 65%, transparent 100%)",
             borderRadius: "50% 50% 30% 30% / 60% 60% 40% 40%",
             animation: "flicker1 1.6s ease-in-out infinite",
             opacity: 0.85,
-            filter: "blur(1px)"
-          }} />
-        
+            filter: "blur(1px)",
+          }}
+        />
 
         {/* Chama média — laranja/amarelo */}
         <div
           style={{
             position: "absolute",
             width: 58,
-            height: 130,
+            height: 68,
             left: "48%",
             top: 30,
             background: "linear-gradient(to top, #FFD700 0%, #FF8C00 45%, #FF4500 75%, transparent 100%)",
             borderRadius: "50% 50% 30% 30% / 60% 60% 40% 40%",
             animation: "flicker2 1.2s ease-in-out infinite",
-            opacity: 0.9
-          }} />
-        
+            opacity: 0.9,
+          }}
+        />
 
         {/* Chama interna — amarelo claro/branco */}
         <div
           style={{
             position: "absolute",
             width: 30,
-            height: 80,
+            height: 40,
             left: "51%",
             top: 60,
             background: "linear-gradient(to top, #FFFFFF 0%, #FFF8DC 25%, #FFD700 60%, transparent 100%)",
             borderRadius: "50% 50% 30% 30% / 60% 60% 40% 40%",
             animation: "flicker3 0.9s ease-in-out infinite",
-            opacity: 0.95
-          }} />
-        
+            opacity: 0.95,
+          }}
+        />
 
         {/* Micro chama lateral esquerda */}
-        
-
-
-
-
-
-
-
-
-
-
-
-        
-        
 
         {/* Micro chama lateral direita */}
-        
-
-
-
-
-
-
-
-
-
-
-
-
-        
       </div>
 
       {/* Reflexo/brilho no chão */}
@@ -161,9 +133,9 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
           marginTop: 6,
           background: "radial-gradient(ellipse, rgba(201,168,76,0.5) 0%, rgba(226,105,10,0.2) 50%, transparent 75%)",
           borderRadius: "50%",
-          animation: "glowPulse 2s ease-in-out infinite"
-        }} />
-      
+          animation: "glowPulse 2s ease-in-out infinite",
+        }}
+      />
 
       {/* Texto */}
       <p
@@ -175,13 +147,13 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
           textTransform: "uppercase",
           marginTop: 36,
           animation: "breathe 1.8s ease-in-out infinite alternate",
-          userSelect: "none"
-        }}>
-        
+          userSelect: "none",
+        }}
+      >
         Toque Para Iniciar
       </p>
-    </div>);
-
+    </div>
+  );
 };
 
 export default SplashScreen;
