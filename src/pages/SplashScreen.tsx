@@ -95,7 +95,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
           style={{
             position: "absolute",
             width: 58,
-            height: 68,
+            height: 75,
             left: "48%",
             top: 30,
             background: "linear-gradient(to top, #FFD700 0%, #FF8C00 45%, #FF4500 75%, transparent 100%)",
