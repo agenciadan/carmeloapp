@@ -56,6 +56,18 @@ const AdminPanel: React.FC = () => {
       mensagem_manutencao: cfg.mensagem_manutencao || '',
     });
 
+    // Community
+    const { data: allPosts } = await supabase.from('posts_comunidade').select('*').order('criado_em', { ascending: false });
+    const posts = allPosts || [];
+    setCommunityPosts(posts);
+    const { data: allReacoes } = await supabase.from('reacoes_posts').select('id');
+    setCommunityMetrics({
+      total: posts.length,
+      visiveis: posts.filter((p: any) => p.visivel).length,
+      ocultos: posts.filter((p: any) => !p.visivel).length,
+      reacoes: (allReacoes || []).length,
+    });
+
     setLoading(false);
   };
 
