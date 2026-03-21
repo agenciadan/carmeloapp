@@ -76,6 +76,57 @@ export type Database = {
           },
         ]
       }
+      dias_leitura: {
+        Row: {
+          concluido: boolean
+          concluido_em: string | null
+          dia_numero: number
+          id: string
+          plano_id: string
+          referencia: string
+          reflexao_ia: string
+          titulo_passagem: string
+          user_id: string
+        }
+        Insert: {
+          concluido?: boolean
+          concluido_em?: string | null
+          dia_numero: number
+          id?: string
+          plano_id: string
+          referencia: string
+          reflexao_ia: string
+          titulo_passagem: string
+          user_id: string
+        }
+        Update: {
+          concluido?: boolean
+          concluido_em?: string | null
+          dia_numero?: number
+          id?: string
+          plano_id?: string
+          referencia?: string
+          reflexao_ia?: string
+          titulo_passagem?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dias_leitura_plano_id_fkey"
+            columns: ["plano_id"]
+            isOneToOne: false
+            referencedRelation: "planos_leitura"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dias_leitura_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       historico: {
         Row: {
           criado_em: string
@@ -110,6 +161,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "historico_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      planos_leitura: {
+        Row: {
+          compartilhado: boolean
+          descricao: string
+          gerado_em: string
+          id: string
+          proximo_plano_em: string | null
+          status: string
+          titulo: string
+          total_dias: number
+          user_id: string
+        }
+        Insert: {
+          compartilhado?: boolean
+          descricao: string
+          gerado_em?: string
+          id?: string
+          proximo_plano_em?: string | null
+          status?: string
+          titulo: string
+          total_dias: number
+          user_id: string
+        }
+        Update: {
+          compartilhado?: boolean
+          descricao?: string
+          gerado_em?: string
+          id?: string
+          proximo_plano_em?: string | null
+          status?: string
+          titulo?: string
+          total_dias?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planos_leitura_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
