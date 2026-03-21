@@ -8,6 +8,7 @@ import VersiculoDoDia from '@/pages/VersiculoDoDia';
 import PlanoLeitura from '@/pages/PlanoLeitura';
 import Aconselhamento from '@/pages/Aconselhamento';
 import Perfil from '@/pages/Perfil';
+import Comunidade from '@/pages/Comunidade';
 import SplashScreen from '@/pages/SplashScreen';
 import AuthPage from '@/pages/AuthPage';
 
