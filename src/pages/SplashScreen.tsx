@@ -121,19 +121,19 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
         
 
         {/* Micro chama lateral esquerda */}
-        <div
-          style={{
-            position: "absolute",
-            width: 22,
-            height: 60,
-            left: "28%",
-            top: 80,
-            background: "linear-gradient(to top, #E2690A 0%, #FF8C00 50%, transparent 100%)",
-            borderRadius: "50% 50% 30% 30% / 60% 60% 40% 40%",
-            animation: "flicker2 1.4s ease-in-out infinite 0.3s",
-            opacity: 0.7,
-            transform: "rotate(-8deg)"
-          }} />
+        
+
+
+
+
+
+
+
+
+
+
+
+        
         
 
         {/* Micro chama lateral direita */}
