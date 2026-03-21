@@ -118,7 +118,7 @@ const Index: React.FC = () => {
       case 'inicio': return <VersiculoDoDia onNavigateTab={(tab) => setActiveTab(tab)} />;
       case 'aconselhar': return <Aconselhamento />;
       case 'plano': return <PlanoLeitura />;
-      case 'comunidade': return <PlaceholderTab title="Comunidade" emoji="🕊" />;
+      case 'comunidade': return <Comunidade onNavigateTab={(tab) => setActiveTab(tab)} />;
       case 'perfil': return <Perfil onNavigateTab={(tab) => setActiveTab(tab)} />;
       default: return <VersiculoDoDia onNavigateTab={(tab) => setActiveTab(tab)} />;
     }

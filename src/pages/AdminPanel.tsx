@@ -9,6 +9,9 @@ const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
 
   const [metrics, setMetrics] = useState({ total: 0, ativos7d: 0, versiculos: 0, aconselhamentos: 0 });
+  const [communityPosts, setCommunityPosts] = useState<any[]>([]);
+  const [communityFilter, setCommunityFilter] = useState<'all' | 'hidden'>('all');
+  const [communityMetrics, setCommunityMetrics] = useState({ total: 0, visiveis: 0, ocultos: 0, reacoes: 0 });
   const [users, setUsers] = useState<any[]>([]);
   const [userSearch, setUserSearch] = useState('');
   const [userPage, setUserPage] = useState(0);

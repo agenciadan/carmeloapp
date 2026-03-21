@@ -654,37 +654,8 @@ const VersiculoDoDia: React.FC<VersiculoDoDiaProps> = ({ onNavigateTab }) => {
           </div>
         </div>
 
-        {/* Comunidade — em breve */}
-        <div style={{ margin: "24px 24px 0" }}>
-          <p
-            style={{
-              fontSize: 11,
-              color: colors.textMuted,
-              textTransform: "uppercase",
-              letterSpacing: 1.5,
-              marginBottom: 14,
-            }}
-          >
-            COMUNIDADE
-          </p>
-          <div
-            style={{
-              background: colors.bgSurface,
-              border: `0.5px dashed ${colors.border}`,
-              borderRadius: 14,
-              padding: 24,
-              textAlign: "center",
-            }}
-          >
-            <span style={{ fontSize: 32, opacity: 0.4, display: "block", marginBottom: 12 }}>🕊</span>
-            <p style={{ fontFamily: fonts.display, fontSize: 17, color: colors.textDim, margin: 0 }}>
-              A Comunidade está chegando
-            </p>
-            <p style={{ fontSize: 13, color: "#2A3F52", marginTop: 8, lineHeight: 1.6, margin: "8px 0 0" }}>
-              Em breve você poderá compartilhar versículos, reflexões e pedidos de oração.
-            </p>
-          </div>
-        </div>
+        {/* Comunidade — últimos posts */}
+        <CommunityPreview onNavigateTab={onNavigateTab} userId={userId} />
 
         {/* Rodapé motivacional */}
         <div style={{ padding: 24, marginTop: 8, textAlign: "center" }}>
