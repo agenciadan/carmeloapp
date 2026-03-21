@@ -5,6 +5,7 @@ import { colors, fonts, appContainer, globalScrollbarCSS } from '@/styles/theme'
 import AppHeader from '@/components/AppHeader';
 import TabBar from '@/components/TabBar';
 import VersiculoDoDia from '@/pages/VersiculoDoDia';
+import PlanoLeitura from '@/pages/PlanoLeitura';
 import Aconselhamento from '@/pages/Aconselhamento';
 import Perfil from '@/pages/Perfil';
 import SplashScreen from '@/pages/SplashScreen';
