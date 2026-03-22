@@ -63,7 +63,9 @@ const Aconselhamento: React.FC = () => {
         },
       });
       if (error) throw error;
-      const parsed = JSON.parse(data.text);
+      const raw = typeof data === "string" ? data : data?.text || data?.result || JSON.stringify(data);
+      const clean = raw.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
       setPerguntaIA(parsed.pergunta);
       setStage("clarificando");
     } catch (err) {
@@ -86,7 +88,9 @@ const Aconselhamento: React.FC = () => {
         },
       });
       if (error) throw error;
-      const parsed: AconselhamentoResult = JSON.parse(data.text);
+      const raw2 = typeof data === "string" ? data : data?.text || data?.result || JSON.stringify(data);
+      const clean2 = raw2.replace(/```json|```/g, "").trim();
+      const parsed: AconselhamentoResult = JSON.parse(clean2);
       setResult(parsed);
       setStage("resultado");
     } catch (err) {
