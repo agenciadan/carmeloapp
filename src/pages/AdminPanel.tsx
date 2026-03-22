@@ -17,6 +17,11 @@ const AdminPanel: React.FC = () => {
   const [admins, setAdmins] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Community moderation state
+  const [comPosts, setComPosts] = useState<any[]>([]);
+  const [comFilter, setComFilter] = useState<'todos' | 'ocultos'>('todos');
+  const [comMetrics, setComMetrics] = useState({ total: 0, visiveis: 0, ocultos: 0, reacoes: 0 });
+
   useEffect(() => {
     if (!isAdmin) return;
     loadData();
@@ -51,6 +56,18 @@ const AdminPanel: React.FC = () => {
       max_tokens: cfg.max_tokens,
       app_em_manutencao: cfg.app_em_manutencao,
       mensagem_manutencao: cfg.mensagem_manutencao || '',
+    });
+
+    // Community
+    const { data: allPosts } = await supabase.from('posts_comunidade').select('*').order('criado_em', { ascending: false });
+    const cposts = allPosts || [];
+    setComPosts(cposts);
+    const { data: allReacoes } = await supabase.from('reacoes_posts').select('id');
+    setComMetrics({
+      total: cposts.length,
+      visiveis: cposts.filter(p => p.visivel).length,
+      ocultos: cposts.filter(p => !p.visivel).length,
+      reacoes: (allReacoes || []).length,
     });
 
     setLoading(false);
@@ -89,6 +106,11 @@ const AdminPanel: React.FC = () => {
   const setRole = async (email: string, role: string) => {
     if (!confirm(`Confirma alterar o role de ${email} para ${role}?`)) return;
     await supabase.from('profiles').update({ role }).eq('email', email);
+    loadData();
+  };
+
+  const togglePostVisivel = async (postId: string, current: boolean) => {
+    await supabase.from('posts_comunidade').update({ visivel: !current }).eq('id', postId);
     loadData();
   };
 
@@ -260,6 +282,72 @@ const AdminPanel: React.FC = () => {
         {admins.map((a) => (
           <div key={a.id} style={{ padding: '6px 0', borderBottom: `0.5px solid ${colors.border}` }}>
             {a.nome || '—'} — <span style={{ color: colors.textDim }}>{a.email}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Comunidade */}
+      <h3 style={sectionTitle}>Comunidade</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10, marginBottom: 16 }}>
+        {[
+          { n: comMetrics.total, l: 'Total Posts' },
+          { n: comMetrics.visiveis, l: 'Visíveis' },
+          { n: comMetrics.ocultos, l: 'Ocultos' },
+          { n: comMetrics.reacoes, l: 'Reações' },
+        ].map(m => (
+          <div key={m.l} style={{ ...cardStyle, padding: 16 }}>
+            <div style={{ fontFamily: fonts.display, fontSize: 24, color: colors.gold }}>{m.n}</div>
+            <div style={{ fontSize: 10, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>{m.l}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        {(['todos', 'ocultos'] as const).map(f => (
+          <button key={f} onClick={() => setComFilter(f)} style={{
+            background: comFilter === f ? colors.gold : colors.bgSurface,
+            color: comFilter === f ? colors.bgPrimary : colors.textMuted,
+            border: comFilter === f ? 'none' : `0.5px solid ${colors.border}`,
+            borderRadius: 20, padding: '6px 14px', fontSize: 12, cursor: 'pointer',
+          }}>
+            {f === 'todos' ? 'Todos' : 'Apenas ocultos'}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {comPosts.filter(p => comFilter === 'todos' || !p.visivel).map(p => (
+          <div key={p.id} style={{
+            background: colors.bgSurface, borderRadius: 10, padding: '12px 14px',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
+          }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+                <span style={{ fontSize: 12, color: colors.textPrimary }}>{p.nome_usuario}</span>
+                <span style={{ fontSize: 10, color: colors.textDim }}>·</span>
+                <span style={{ fontSize: 10, color: colors.textDim }}>{p.tipo}</span>
+                <span style={{
+                  fontSize: 10, padding: '1px 8px', borderRadius: 10,
+                  background: p.visivel ? `${colors.success}20` : `${colors.error}20`,
+                  color: p.visivel ? colors.success : colors.error,
+                }}>
+                  {p.visivel ? 'Visível' : 'Oculto'}
+                </span>
+              </div>
+              <p style={{ fontSize: 12, color: colors.textMuted, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {p.conteudo.substring(0, 60)}{p.conteudo.length > 60 ? '...' : ''}
+              </p>
+            </div>
+            <button
+              onClick={() => togglePostVisivel(p.id, p.visivel)}
+              style={{
+                background: 'none', border: `1px solid ${p.visivel ? colors.error : colors.success}`,
+                borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer',
+                color: p.visivel ? colors.error : colors.success, whiteSpace: 'nowrap',
+              }}
+            >
+              {p.visivel ? 'Ocultar' : 'Restaurar'}
+            </button>
           </div>
         ))}
       </div>

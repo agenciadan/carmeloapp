@@ -107,6 +107,94 @@ const extractVersiculoResult = (data: any): VersiculoResult => {
   throw new Error(`Resposta inesperada da IA: ${JSON.stringify(data)}`);
 };
 
+const CommunityPreview: React.FC<{ onNavigateTab?: (tab: string) => void; userId?: string }> = ({ onNavigateTab, userId }) => {
+  const [posts, setPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!userId) return;
+    const load = async () => {
+      const { data } = await supabase.from('posts_comunidade').select('*').eq('visivel', true)
+        .order('criado_em', { ascending: false }).limit(3);
+      if (data && data.length > 0) {
+        const postIds = data.map(p => p.id);
+        const { data: reacoes } = await supabase.from('reacoes_posts').select('post_id, tipo').in('post_id', postIds);
+        setPosts(data.map(p => {
+          const pr = (reacoes || []).filter(r => r.post_id === p.id);
+          return { ...p, orando: pr.filter(r => r.tipo === 'orando').length, amei: pr.filter(r => r.tipo === 'amei').length };
+        }));
+      }
+    };
+    load();
+  }, [userId]);
+
+  const badgeStyle = (tipo: string) => {
+    const m: Record<string, { color: string; border: string; bg: string; label: string }> = {
+      versiculo: { color: colors.gold, border: colors.goldDim, bg: '#1A1000', label: 'Versículo' },
+      reflexao: { color: colors.textMuted, border: colors.border, bg: colors.bgSurface, label: 'Reflexão' },
+      oracao: { color: '#9BAFC0', border: colors.border, bg: colors.bgSurface, label: 'Oração' },
+      plano: { color: colors.success, border: '#0F2A1A', bg: '#091A0E', label: 'Plano' },
+    };
+    return m[tipo] || m.reflexao;
+  };
+
+  return (
+    <div style={{ margin: '24px 24px 0' }}>
+      <p style={{ fontSize: 11, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 14 }}>
+        COMUNIDADE
+      </p>
+      {posts.length === 0 ? (
+        <div style={{
+          background: colors.bgSurface, border: `0.5px dashed ${colors.border}`,
+          borderRadius: 14, padding: 24, textAlign: 'center',
+        }}>
+          <span style={{ fontSize: 32, opacity: 0.4, display: 'block', marginBottom: 12 }}>🕊</span>
+          <p style={{ fontFamily: fonts.display, fontSize: 17, color: colors.textDim, margin: 0 }}>A Comunidade está chegando</p>
+          <p style={{ fontSize: 13, color: '#2A3F52', marginTop: 8, lineHeight: 1.6, margin: '8px 0 0' }}>
+            Em breve você poderá compartilhar versículos, reflexões e pedidos de oração.
+          </p>
+        </div>
+      ) : (
+        <>
+          {posts.map(p => {
+            const b = badgeStyle(p.tipo);
+            return (
+              <div key={p.id} style={{
+                background: colors.bgSurface, border: `0.5px solid ${colors.border}`,
+                borderRadius: 12, padding: '14px 16px', marginBottom: 10,
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 13, color: colors.textPrimary, fontWeight: 500 }}>{p.nome_usuario}</span>
+                  <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, border: `0.5px solid ${b.border}`, color: b.color, background: b.bg }}>{b.label}</span>
+                </div>
+                {p.referencia_biblica && <p style={{ fontSize: 12, color: colors.gold, marginTop: 4, margin: '4px 0 0' }}>{p.referencia_biblica}</p>}
+                <p style={{
+                  fontSize: 12, color: colors.textMuted, marginTop: 4, margin: '4px 0 0',
+                  overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                }}>{p.conteudo}</p>
+                {(p.orando > 0 || p.amei > 0) && (
+                  <p style={{ fontSize: 11, color: colors.textDim, marginTop: 6, margin: '6px 0 0' }}>
+                    {p.orando > 0 && `🙏${p.orando} `}{p.amei > 0 && `❤️${p.amei}`}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+          <button
+            onClick={() => onNavigateTab?.('comunidade')}
+            style={{
+              border: `0.5px solid ${colors.border}`, color: colors.textDim,
+              background: 'transparent', borderRadius: 10, padding: 12,
+              width: '100%', fontSize: 13, cursor: 'pointer', fontFamily: fonts.body, marginTop: 12,
+            }}
+          >
+            Ver toda a comunidade
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
+
 const VersiculoDoDia: React.FC<VersiculoDoDiaProps> = ({ onNavigateTab }) => {
   const { session, profile } = useAuth();
   const userId = session?.user?.id;
@@ -654,37 +742,8 @@ const VersiculoDoDia: React.FC<VersiculoDoDiaProps> = ({ onNavigateTab }) => {
           </div>
         </div>
 
-        {/* Comunidade — em breve */}
-        <div style={{ margin: "24px 24px 0" }}>
-          <p
-            style={{
-              fontSize: 11,
-              color: colors.textMuted,
-              textTransform: "uppercase",
-              letterSpacing: 1.5,
-              marginBottom: 14,
-            }}
-          >
-            COMUNIDADE
-          </p>
-          <div
-            style={{
-              background: colors.bgSurface,
-              border: `0.5px dashed ${colors.border}`,
-              borderRadius: 14,
-              padding: 24,
-              textAlign: "center",
-            }}
-          >
-            <span style={{ fontSize: 32, opacity: 0.4, display: "block", marginBottom: 12 }}>🕊</span>
-            <p style={{ fontFamily: fonts.display, fontSize: 17, color: colors.textDim, margin: 0 }}>
-              A Comunidade está chegando
-            </p>
-            <p style={{ fontSize: 13, color: "#2A3F52", marginTop: 8, lineHeight: 1.6, margin: "8px 0 0" }}>
-              Em breve você poderá compartilhar versículos, reflexões e pedidos de oração.
-            </p>
-          </div>
-        </div>
+        {/* Comunidade */}
+        <CommunityPreview onNavigateTab={onNavigateTab} userId={userId} />
 
         {/* Rodapé motivacional */}
         <div style={{ padding: 24, marginTop: 8, textAlign: "center" }}>

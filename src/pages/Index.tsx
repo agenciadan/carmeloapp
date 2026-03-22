@@ -8,6 +8,7 @@ import VersiculoDoDia from '@/pages/VersiculoDoDia';
 import PlanoLeitura from '@/pages/PlanoLeitura';
 import Aconselhamento from '@/pages/Aconselhamento';
 import Perfil from '@/pages/Perfil';
+import Comunidade from '@/pages/Comunidade';
 import SplashScreen from '@/pages/SplashScreen';
 import AuthPage from '@/pages/AuthPage';
 
@@ -117,7 +118,7 @@ const Index: React.FC = () => {
       case 'inicio': return <VersiculoDoDia onNavigateTab={(tab) => setActiveTab(tab)} />;
       case 'aconselhar': return <Aconselhamento />;
       case 'plano': return <PlanoLeitura />;
-      case 'comunidade': return <PlaceholderTab title="Comunidade" emoji="🕊" />;
+      case 'comunidade': return <Comunidade onNavigateTab={(tab) => setActiveTab(tab)} />;
       case 'perfil': return <Perfil onNavigateTab={(tab) => setActiveTab(tab)} />;
       default: return <VersiculoDoDia onNavigateTab={(tab) => setActiveTab(tab)} />;
     }
