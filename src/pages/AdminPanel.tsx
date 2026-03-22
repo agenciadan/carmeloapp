@@ -109,6 +109,11 @@ const AdminPanel: React.FC = () => {
     loadData();
   };
 
+  const togglePostVisivel = async (postId: string, current: boolean) => {
+    await supabase.from('posts_comunidade').update({ visivel: !current }).eq('id', postId);
+    loadData();
+  };
+
   if (!isAdmin) {
     return <div style={{ padding: 40, textAlign: 'center', color: colors.error }}>Acesso negado</div>;
   }
