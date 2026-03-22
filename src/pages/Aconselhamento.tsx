@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { colors, fonts } from '@/styles/theme';
+import React, { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { colors, fonts } from "@/styles/theme";
 
 interface AconselhamentoResult {
   reflexao: string;
@@ -14,40 +14,58 @@ const Aconselhamento: React.FC = () => {
   const { session } = useAuth();
   const userId = session?.user?.id;
 
-  const [stage, setStage] = useState<'entrada' | 'clarificando' | 'loading' | 'resultado'>('entrada');
-  const [situacao, setSituacao] = useState('');
-  const [perguntaIA, setPerguntaIA] = useState('');
-  const [resposta, setResposta] = useState('');
+  const [stage, setStage] = useState<"entrada" | "clarificando" | "loading" | "resultado">("entrada");
+  const [situacao, setSituacao] = useState("");
+  const [perguntaIA, setPerguntaIA] = useState("");
+  const [resposta, setResposta] = useState("");
   const [result, setResult] = useState<AconselhamentoResult | null>(null);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const textareaStyle: React.CSSProperties = {
-    width: '100%', minHeight: 120, padding: '14px 16px', background: colors.bgSurface,
-    border: `0.5px solid ${colors.border}`, borderRadius: 12, color: colors.textPrimary,
-    fontSize: 15, fontFamily: fonts.body, outline: 'none', resize: 'vertical', boxSizing: 'border-box',
+    width: "100%",
+    minHeight: 120,
+    padding: "14px 16px",
+    background: colors.bgSurface,
+    border: `0.5px solid ${colors.border}`,
+    borderRadius: 12,
+    color: colors.textPrimary,
+    fontSize: 15,
+    fontFamily: fonts.body,
+    outline: "none",
+    resize: "vertical",
+    boxSizing: "border-box",
   };
 
   const btnGold: React.CSSProperties = {
-    width: '100%', padding: '14px', background: colors.gold, color: colors.bgPrimary,
-    border: 'none', borderRadius: 10, fontSize: 15, fontWeight: 600, cursor: 'pointer',
-    fontFamily: fonts.body, marginTop: 16,
+    width: "100%",
+    padding: "14px",
+    background: colors.gold,
+    color: colors.bgPrimary,
+    border: "none",
+    borderRadius: 10,
+    fontSize: 15,
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: fonts.body,
+    marginTop: 16,
   };
 
   const handleContinue = async () => {
     if (!situacao.trim()) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('anthropic-proxy', {
+      const { data, error } = await supabase.functions.invoke("anthropic-proxy", {
         body: {
-          systemPrompt: 'Você é um conselheiro bíblico humano, empático e perspicaz. Antes de aconselhar, faça 1 pergunta curta e precisa para entender melhor a situação. A pergunta deve soar completamente natural — como um amigo sábio perguntaria, não como um formulário ou um robô. Responda APENAS em JSON válido sem markdown. Chave: pergunta (string).',
+          systemPrompt:
+            "Você é um conselheiro bíblico humano, empático e perspicaz. Antes de aconselhar, faça 1 pergunta curta e precisa para entender melhor a situação. A pergunta deve soar completamente natural — como um amigo sábio perguntaria, não como um formulário ou um robô. Responda APENAS em JSON válido sem markdown. Chave: pergunta (string).",
           userMessage: situacao,
         },
       });
       if (error) throw error;
       const parsed = JSON.parse(data.text);
       setPerguntaIA(parsed.pergunta);
-      setStage('clarificando');
+      setStage("clarificando");
     } catch (err) {
       console.error(err);
     } finally {
@@ -57,22 +75,23 @@ const Aconselhamento: React.FC = () => {
 
   const handleBuscarConselho = async () => {
     if (!resposta.trim()) return;
-    setStage('loading');
+    setStage("loading");
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('anthropic-proxy', {
+      const { data, error } = await supabase.functions.invoke("anthropic-proxy", {
         body: {
-          systemPrompt: 'Você é um conselheiro bíblico profundo com conhecimento de toda a Bíblia Sagrada. REGRAS OBRIGATÓRIAS: 1. Explore toda a Bíblia para encontrar a passagem mais adequada. Considere ativamente livros menos explorados além dos populares. A riqueza da Bíblia é infinita — use-a com amplitude. 2. NUNCA use versículos genéricos ou os mais citados (João 3:16, Filipenses 4:13, Jeremias 29:11, Romanos 8:28) exceto quando absolutamente nenhuma outra passagem se encaixar melhor. 3. O paralelo bíblico deve ser ESPECÍFICO e CONCRETO — não use Davi genericamente, escolha um momento específico da vida dele. Exemplo: não \"Davi enfrentou dificuldades\" mas \"Davi no Salmo 22, quando se sentia completamente abandonado por Deus antes da vitória\". Faça o mesmo para qualquer personagem escolhido. 4. A reflexão deve mostrar que você ENTENDEU a situação específica daquela pessoa, não uma resposta genérica que serviria para qualquer um. 5. A aplicação prática deve ser UMA ação concreta e possível de fazer HOJE — não um conselho vago como \"ore mais\" ou \"confie em Deus\". Responda APENAS em JSON válido sem markdown. Chaves obrigatórias: reflexao (string, 2-3 linhas empáticas em segunda pessoa, específicas para a situação), versiculoPrincipal (objeto com: referencia, texto, contextoNarrativo — 2-3 linhas sobre onde e quando foi escrito e o que estava acontecendo naquele momento histórico), paraleloBiblico (objeto com: personagem, historia — 3-4 linhas ESPECÍFICAS sobre um momento concreto da vida desse personagem que espelha a situação do usuário), aplicacaoPratica (string, ação concreta e específica para hoje, segunda pessoa, máximo 3 linhas).',
+          systemPrompt:
+            'Você é um conselheiro bíblico profundo com conhecimento de toda a Bíblia Sagrada. REGRAS OBRIGATÓRIAS: 1. Explore toda a Bíblia para encontrar a passagem mais adequada. Considere ativamente livros menos explorados além dos populares. A riqueza da Bíblia é infinita — use-a com amplitude. 2. O paralelo bíblico deve ser ESPECÍFICO e CONCRETO — não use Davi genericamente, escolha um momento específico da vida dele. Exemplo: não \"Davi enfrentou dificuldades\" mas \"Davi no Salmo 22, quando se sentia completamente abandonado por Deus antes da vitória\". Faça o mesmo para qualquer personagem escolhido. 3. A reflexão deve mostrar que você ENTENDEU a situação específica daquela pessoa, não uma resposta genérica que serviria para qualquer um. 4. A aplicação prática deve ser UMA ação concreta e possível de fazer HOJE — não um conselho vago como \"ore mais\" ou \"confie em Deus\". Responda APENAS em JSON válido sem markdown. Chaves obrigatórias: reflexao (string, 2-3 linhas empáticas em segunda pessoa, específicas para a situação), versiculoPrincipal (objeto com: referencia, texto, contextoNarrativo — 2-3 linhas sobre onde e quando foi escrito e o que estava acontecendo naquele momento histórico), paraleloBiblico (objeto com: personagem, historia — 3-4 linhas ESPECÍFICAS sobre um momento concreto da vida desse personagem que espelha a situação do usuário), aplicacaoPratica (string, ação concreta e específica para hoje, segunda pessoa, máximo 3 linhas).',
           userMessage: `Situação original: ${situacao}\n\nPergunta da IA: ${perguntaIA}\nResposta do usuário: ${resposta}`,
         },
       });
       if (error) throw error;
       const parsed: AconselhamentoResult = JSON.parse(data.text);
       setResult(parsed);
-      setStage('resultado');
+      setStage("resultado");
     } catch (err) {
       console.error(err);
-      setStage('clarificando');
+      setStage("clarificando");
     } finally {
       setLoading(false);
     }
@@ -81,10 +100,10 @@ const Aconselhamento: React.FC = () => {
   const handleSave = async () => {
     if (!userId || !result) return;
     const today = new Date();
-    await supabase.from('historico').insert({
+    await supabase.from("historico").insert({
       user_id: userId,
-      tipo: 'aconselhamento',
-      data_formatada: today.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }),
+      tipo: "aconselhamento",
+      data_formatada: today.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }),
       referencia: result.versiculoPrincipal.referencia,
       texto_preview: result.reflexao.substring(0, 100),
       dados_completos: result as any,
@@ -93,43 +112,88 @@ const Aconselhamento: React.FC = () => {
   };
 
   const reset = () => {
-    setSituacao('');
-    setPerguntaIA('');
-    setResposta('');
+    setSituacao("");
+    setPerguntaIA("");
+    setResposta("");
     setResult(null);
     setSaved(false);
-    setStage('entrada');
+    setStage("entrada");
   };
 
-  if (stage === 'loading') {
+  if (stage === "loading") {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 400, padding: 24 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: 400,
+          padding: 24,
+        }}
+      >
         <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-        <div style={{ width: 32, height: 32, border: `2px solid ${colors.border}`, borderTop: `2px solid ${colors.gold}`, borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-        <p style={{ fontFamily: fonts.display, fontStyle: 'italic', fontSize: 18, color: colors.textMuted, marginTop: 20, textAlign: 'center' }}>
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            border: `2px solid ${colors.border}`,
+            borderTop: `2px solid ${colors.gold}`,
+            borderRadius: "50%",
+            animation: "spin 1s linear infinite",
+          }}
+        />
+        <p
+          style={{
+            fontFamily: fonts.display,
+            fontStyle: "italic",
+            fontSize: 18,
+            color: colors.textMuted,
+            marginTop: 20,
+            textAlign: "center",
+          }}
+        >
           Buscando conselho bíblico...
         </p>
       </div>
     );
   }
 
-  if (stage === 'resultado' && result) {
+  if (stage === "resultado" && result) {
     return (
-      <div style={{ padding: '24px 20px' }}>
+      <div style={{ padding: "24px 20px" }}>
         {/* Reflexão */}
         <div style={{ marginBottom: 28 }}>
-          <p style={{ fontSize: 12, color: colors.gold, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>♡ REFLEXÃO</p>
-          <p style={{ fontSize: 15, color: '#9BAFC0', fontStyle: 'italic', lineHeight: 1.9 }}>{result.reflexao}</p>
+          <p
+            style={{ fontSize: 12, color: colors.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}
+          >
+            ♡ REFLEXÃO
+          </p>
+          <p style={{ fontSize: 15, color: "#9BAFC0", fontStyle: "italic", lineHeight: 1.9 }}>{result.reflexao}</p>
         </div>
 
         {/* Versículo */}
         <div style={{ marginBottom: 28 }}>
-          <p style={{ fontSize: 12, color: colors.gold, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>✦ A PALAVRA PARA VOCÊ</p>
-          <p style={{ fontFamily: fonts.display, fontSize: 15, color: colors.gold }}>{result.versiculoPrincipal.referencia}</p>
-          <p style={{
-            fontFamily: fonts.display, fontStyle: 'italic', fontSize: 22, color: colors.textPrimary,
-            borderLeft: `2px solid ${colors.gold}`, paddingLeft: 20, marginTop: 12, lineHeight: 1.5,
-          }}>
+          <p
+            style={{ fontSize: 12, color: colors.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}
+          >
+            ✦ A PALAVRA PARA VOCÊ
+          </p>
+          <p style={{ fontFamily: fonts.display, fontSize: 15, color: colors.gold }}>
+            {result.versiculoPrincipal.referencia}
+          </p>
+          <p
+            style={{
+              fontFamily: fonts.display,
+              fontStyle: "italic",
+              fontSize: 22,
+              color: colors.textPrimary,
+              borderLeft: `2px solid ${colors.gold}`,
+              paddingLeft: 20,
+              marginTop: 12,
+              lineHeight: 1.5,
+            }}
+          >
             {result.versiculoPrincipal.texto}
           </p>
           <p style={{ fontSize: 14, color: colors.textMuted, marginTop: 12, lineHeight: 1.7 }}>
@@ -139,33 +203,63 @@ const Aconselhamento: React.FC = () => {
 
         {/* Paralelo bíblico */}
         <div style={{ marginBottom: 28 }}>
-          <p style={{ fontSize: 12, color: colors.gold, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>◎ QUEM JÁ VIVEU ISSO</p>
-          <div style={{ background: colors.bgSurface, borderRadius: 12, padding: '16px 20px' }}>
-            <p style={{ fontFamily: fonts.display, fontSize: 16, color: colors.gold, marginBottom: 8 }}>{result.paraleloBiblico.personagem}</p>
+          <p
+            style={{ fontSize: 12, color: colors.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}
+          >
+            ◎ QUEM JÁ VIVEU ISSO
+          </p>
+          <div style={{ background: colors.bgSurface, borderRadius: 12, padding: "16px 20px" }}>
+            <p style={{ fontFamily: fonts.display, fontSize: 16, color: colors.gold, marginBottom: 8 }}>
+              {result.paraleloBiblico.personagem}
+            </p>
             <p style={{ fontSize: 14, color: colors.textMuted, lineHeight: 1.7 }}>{result.paraleloBiblico.historia}</p>
           </div>
         </div>
 
         {/* Aplicação */}
         <div style={{ marginBottom: 32 }}>
-          <p style={{ fontSize: 12, color: colors.gold, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>→ COMO APLICAR HOJE</p>
-          <p style={{ fontSize: 15, color: '#9BAFC0', lineHeight: 1.9 }}>{result.aplicacaoPratica}</p>
+          <p
+            style={{ fontSize: 12, color: colors.gold, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}
+          >
+            → COMO APLICAR HOJE
+          </p>
+          <p style={{ fontSize: 15, color: "#9BAFC0", lineHeight: 1.9 }}>{result.aplicacaoPratica}</p>
         </div>
 
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button onClick={handleSave} disabled={saved} style={{
-            flex: 1, padding: '14px', borderRadius: 10, border: 'none', cursor: 'pointer',
-            background: saved ? colors.bgSurface : colors.gold,
-            color: saved ? colors.textMuted : colors.bgPrimary,
-            fontSize: 14, fontWeight: 600, fontFamily: fonts.body,
-          }}>
-            {saved ? '✓ Salvo' : '♡ Salvar'}
+        <div style={{ display: "flex", gap: 12 }}>
+          <button
+            onClick={handleSave}
+            disabled={saved}
+            style={{
+              flex: 1,
+              padding: "14px",
+              borderRadius: 10,
+              border: "none",
+              cursor: "pointer",
+              background: saved ? colors.bgSurface : colors.gold,
+              color: saved ? colors.textMuted : colors.bgPrimary,
+              fontSize: 14,
+              fontWeight: 600,
+              fontFamily: fonts.body,
+            }}
+          >
+            {saved ? "✓ Salvo" : "♡ Salvar"}
           </button>
-          <button onClick={reset} style={{
-            flex: 1, padding: '14px', borderRadius: 10, cursor: 'pointer',
-            background: 'transparent', border: `1px solid ${colors.gold}`,
-            color: colors.gold, fontSize: 14, fontWeight: 600, fontFamily: fonts.body,
-          }}>
+          <button
+            onClick={reset}
+            style={{
+              flex: 1,
+              padding: "14px",
+              borderRadius: 10,
+              cursor: "pointer",
+              background: "transparent",
+              border: `1px solid ${colors.gold}`,
+              color: colors.gold,
+              fontSize: 14,
+              fontWeight: 600,
+              fontFamily: fonts.body,
+            }}
+          >
             Nova consulta
           </button>
         </div>
@@ -173,15 +267,28 @@ const Aconselhamento: React.FC = () => {
     );
   }
 
-  if (stage === 'clarificando') {
+  if (stage === "clarificando") {
     return (
-      <div style={{ padding: '24px 20px' }}>
-        <p style={{ fontFamily: fonts.display, fontSize: 22, color: colors.textPrimary, lineHeight: 1.4, marginBottom: 20 }}>
+      <div style={{ padding: "24px 20px" }}>
+        <p
+          style={{
+            fontFamily: fonts.display,
+            fontSize: 22,
+            color: colors.textPrimary,
+            lineHeight: 1.4,
+            marginBottom: 20,
+          }}
+        >
           {perguntaIA}
         </p>
-        <textarea style={textareaStyle} placeholder="Sua resposta..." value={resposta} onChange={(e) => setResposta(e.target.value)} />
+        <textarea
+          style={textareaStyle}
+          placeholder="Sua resposta..."
+          value={resposta}
+          onChange={(e) => setResposta(e.target.value)}
+        />
         <button style={btnGold} onClick={handleBuscarConselho} disabled={loading}>
-          {loading ? '...' : 'Buscar conselho bíblico'}
+          {loading ? "..." : "Buscar conselho bíblico"}
         </button>
       </div>
     );
@@ -189,16 +296,30 @@ const Aconselhamento: React.FC = () => {
 
   // Entrada
   return (
-    <div style={{ padding: '24px 20px' }}>
-      <h2 style={{ fontFamily: fonts.display, fontSize: 26, color: colors.textPrimary, lineHeight: 1.35, marginBottom: 8, fontWeight: 400 }}>
+    <div style={{ padding: "24px 20px" }}>
+      <h2
+        style={{
+          fontFamily: fonts.display,
+          fontSize: 26,
+          color: colors.textPrimary,
+          lineHeight: 1.35,
+          marginBottom: 8,
+          fontWeight: 400,
+        }}
+      >
         O que está no seu coração?
       </h2>
       <p style={{ fontSize: 14, color: colors.textMuted, marginBottom: 24, lineHeight: 1.6 }}>
-        Descreva a situação que você está vivendo. A IA vai te ajudar a encontrar sabedoria bíblica.
+        Descreva a situação que você está vivendo. O Carmelo vai te ajudar a encontrar sabedoria bíblica.
       </p>
-      <textarea style={textareaStyle} placeholder="Conte o que está acontecendo..." value={situacao} onChange={(e) => setSituacao(e.target.value)} />
+      <textarea
+        style={textareaStyle}
+        placeholder="Conte o que está acontecendo..."
+        value={situacao}
+        onChange={(e) => setSituacao(e.target.value)}
+      />
       <button style={btnGold} onClick={handleContinue} disabled={loading}>
-        {loading ? '...' : 'Continuar'}
+        {loading ? "..." : "Continuar"}
       </button>
     </div>
   );
