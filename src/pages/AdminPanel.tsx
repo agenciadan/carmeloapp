@@ -17,6 +17,11 @@ const AdminPanel: React.FC = () => {
   const [admins, setAdmins] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Community moderation state
+  const [comPosts, setComPosts] = useState<any[]>([]);
+  const [comFilter, setComFilter] = useState<'todos' | 'ocultos'>('todos');
+  const [comMetrics, setComMetrics] = useState({ total: 0, visiveis: 0, ocultos: 0, reacoes: 0 });
+
   useEffect(() => {
     if (!isAdmin) return;
     loadData();
