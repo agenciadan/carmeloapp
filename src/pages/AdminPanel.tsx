@@ -286,6 +286,72 @@ const AdminPanel: React.FC = () => {
         ))}
       </div>
 
+      {/* Comunidade */}
+      <h3 style={sectionTitle}>Comunidade</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10, marginBottom: 16 }}>
+        {[
+          { n: comMetrics.total, l: 'Total Posts' },
+          { n: comMetrics.visiveis, l: 'Visíveis' },
+          { n: comMetrics.ocultos, l: 'Ocultos' },
+          { n: comMetrics.reacoes, l: 'Reações' },
+        ].map(m => (
+          <div key={m.l} style={{ ...cardStyle, padding: 16 }}>
+            <div style={{ fontFamily: fonts.display, fontSize: 24, color: colors.gold }}>{m.n}</div>
+            <div style={{ fontSize: 10, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 1, marginTop: 4 }}>{m.l}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        {(['todos', 'ocultos'] as const).map(f => (
+          <button key={f} onClick={() => setComFilter(f)} style={{
+            background: comFilter === f ? colors.gold : colors.bgSurface,
+            color: comFilter === f ? colors.bgPrimary : colors.textMuted,
+            border: comFilter === f ? 'none' : `0.5px solid ${colors.border}`,
+            borderRadius: 20, padding: '6px 14px', fontSize: 12, cursor: 'pointer',
+          }}>
+            {f === 'todos' ? 'Todos' : 'Apenas ocultos'}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {comPosts.filter(p => comFilter === 'todos' || !p.visivel).map(p => (
+          <div key={p.id} style={{
+            background: colors.bgSurface, borderRadius: 10, padding: '12px 14px',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12,
+          }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+                <span style={{ fontSize: 12, color: colors.textPrimary }}>{p.nome_usuario}</span>
+                <span style={{ fontSize: 10, color: colors.textDim }}>·</span>
+                <span style={{ fontSize: 10, color: colors.textDim }}>{p.tipo}</span>
+                <span style={{
+                  fontSize: 10, padding: '1px 8px', borderRadius: 10,
+                  background: p.visivel ? `${colors.success}20` : `${colors.error}20`,
+                  color: p.visivel ? colors.success : colors.error,
+                }}>
+                  {p.visivel ? 'Visível' : 'Oculto'}
+                </span>
+              </div>
+              <p style={{ fontSize: 12, color: colors.textMuted, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {p.conteudo.substring(0, 60)}{p.conteudo.length > 60 ? '...' : ''}
+              </p>
+            </div>
+            <button
+              onClick={() => togglePostVisivel(p.id, p.visivel)}
+              style={{
+                background: 'none', border: `1px solid ${p.visivel ? colors.error : colors.success}`,
+                borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer',
+                color: p.visivel ? colors.error : colors.success, whiteSpace: 'nowrap',
+              }}
+            >
+              {p.visivel ? 'Ocultar' : 'Restaurar'}
+            </button>
+          </div>
+        ))}
+      </div>
+
       <div style={{ height: 60 }} />
     </div>
   );
